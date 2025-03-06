@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Election Data Analysis</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .our-table th {
+            background-color: #cce5ff; /* Light blue for our candidate */
+        }
+        .opponent-table th {
+            background-color: #ffcccc; /* Light red for opponent */
+        }
+    </style>
+</head>
+<body>
+    <h1>Election Report</h1>
+
+    <h2>Our Strongest Vote Centers (Candidate 7 ≥ 80%)</h2>
+    {% if our_strong_centers %}
+        <table class="our-table">
+            <tr>
+                <th>ID</th>
+                <th>Center Name</th>
+                <th>Our Votes</th>
+                <th>Total Legal Votes</th>
+                <th>Vote Percentage (%)</th>
+            </tr>
+            {% for center in our_strong_centers %}
+                <tr>
+                    <td>{{ center.id }}</td>
+                    <td>{{ center.center_name }}</td>
+                    <td>{{ center.our_votes }}</td>
+                    <td>{{ center.total_legal_vote }}</td>
+                    <td>{{ center.our_percentage|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No vote centers found where Candidate 7 achieved 80% or more.</p>
+    {% endif %}
+
+    <h2>Opponent's Strongest Vote Centers (Candidate 2 ≥ 80%)</h2>
+    {% if opponent_strong_centers %}
+        <table class="opponent-table">
+            <tr>
+                <th>ID</th>
+                <th>Center Name</th>
+                <th>Opponent Votes</th>
+                <th>Total Legal Votes</th>
+                <th>Vote Percentage (%)</th>
+            </tr>
+            {% for center in opponent_strong_centers %}
+                <tr>
+                    <td>{{ center.id }}</td>
+                    <td>{{ center.center_name }}</td>
+                    <td>{{ center.opponent_votes }}</td>
+                    <td>{{ center.total_legal_vote }}</td>
+                    <td>{{ center.opponent_percentage|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No vote centers found where Candidate 2 achieved 80% or more.</p>
+    {% endif %}
+
+    <h2>Visualization</h2>
+    <img src="{{ chart_image }}" alt="Strong Centers Comparison">
+</body>
+</html>

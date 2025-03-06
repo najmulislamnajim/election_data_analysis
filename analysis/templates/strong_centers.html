@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strong Centers</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Strong Centers</h1>
+
+    <div style="width: 80%; margin: auto;">
+        <canvas id="voteRateChart"></canvas>
+    </div>
+
+    <script>
+        // Get the data passed from the Django view
+        const data = {{ our_strong_centers|safe }};
+
+        // Extract labels (center names) and datasets (vote rates) from the data
+        const labels = data.map(center => center.center_name);
+        const ourVoteRates = data.map(center => center.our_vote_rate);
+        const opponentVoteRates = data.map(center => center.opponent_vote_rate);
+
+        // Create the chart
+        const ctx = document.getElementById('voteRateChart').getContext('2d');
+        const voteRateChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Our Vote Rate',
+                        data: ourVoteRates,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',  // Blue
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Opponent Vote Rate',
+                        data: opponentVoteRates,
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',  // Red
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        tickRotation: 45,  // Rotate center names for better readability
+                        ticks: {
+                            maxRotation: 90,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
