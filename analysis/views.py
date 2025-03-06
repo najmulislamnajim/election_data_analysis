@@ -7,9 +7,6 @@ def plot_vote_rates(request):
     return render(request, 'test.html', {'data':data})
 
 
-def home(request):
-    return render(request, 'home.html')
-
 
 def home(request):
     data = analyze_election_data()
@@ -23,7 +20,7 @@ def home(request):
             {'name': 'Underperforming Centers', 'range': 'Below 20%', 'url_name': 'very_weak_centers', 'count': len(data['our_underperforming_centers'])},
         ]
     }
-    return render(request, 'h.html', context)
+    return render(request, 'home.html', context)
 
 def center_detail(request):
     data = analyze_election_data()
