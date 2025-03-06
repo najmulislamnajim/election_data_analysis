@@ -5,76 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Election Data Analysis</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.3s ease;
-            text-decoration: none; /* Remove underline from link */
-            color: inherit; /* Inherit text color */
-            display: block; /* Make entire card clickable */
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h2 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-
-        .card p {
-            font-size: 1em;
-            color: #666;
-        }
-
-        .emoji {
-            font-size: 2em;
-            margin-bottom: 10px;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover .emoji {
-            transform: scale(1.2);
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: #333; }
+        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 20px; text-align: center; transition: transform 0.3s ease; text-decoration: none; color: inherit; display: block; }
+        .card:hover { transform: translateY(-5px); }
+        .card h2 { font-size: 1.5em; margin-bottom: 10px; }
+        .card p { font-size: 1em; color: #666; }
+        .emoji { font-size: 2em; margin-bottom: 10px; display: block; transition: transform 0.3s ease; }
+        .card:hover .emoji { transform: scale(1.2); }
         .strongest { border-top: 5px solid #2ecc71; }
         .strong { border-top: 5px solid #3498db; }
         .critical { border-top: 5px solid #f1c40f; }
         .competitive { border-top: 5px solid #e67e22; }
         .weak { border-top: 5px solid #e74c3c; }
         .very-weak { border-top: 5px solid #95a5a6; }
-
         @media (max-width: 600px) {
             .card-container { grid-template-columns: 1fr; }
             .card h2 { font-size: 1.2em; }
@@ -84,38 +30,28 @@
     </style>
 </head>
 <body>
-    <h1>Election Data Analysis</h1>
+    <h1>Vote Center Analysis</h1>
     <div class="card-container">
-        <a href="#" class="card strongest">
-            <span class="emoji">🏆</span>
-            <h2>Strongest Centers</h2>
-            <p>80% or Higher Vote Share</p>
-        </a>
-        <a href="{% url 'strong_centers' %}" class="card strong">
-            <span class="emoji">💪</span>
-            <h2>Strong Centers</h2>
-            <p>60% to 79% Vote Share</p>
-        </a>
-        <a href="#" class="card critical">
-            <span class="emoji">⚠️</span>
-            <h2>Critical Centers</h2>
-            <p>50% to 59% Vote Share</p>
-        </a>
-        <a href="#" class="card competitive">
-            <span class="emoji">🤼</span>
-            <h2>Competitive Centers</h2>
-            <p>40% to 49% Vote Share</p>
-        </a>
-        <a href="#" class="card weak">
-            <span class="emoji">😓</span>
-            <h2>Weak Centers</h2>
-            <p>20% to 39% Vote Share</p>
-        </a>
-        <a href="#" class="card very-weak">
-            <span class="emoji">😞</span>
-            <h2>Very Weak Centers</h2>
-            <p>Below 20% Vote Share</p>
-        </a>
+        {% for category in categories %}
+            <a href="{% url category.url_name %}" class="card {{ category.url_name|cut:'_centers' }}">
+                {% if category.name == 'Dominant Centers' %}
+                    <span class="emoji">🏆</span>
+                {% elif category.name == 'Solid Centers' %}
+                    <span class="emoji">💪</span>
+                {% elif category.name == 'Critical Centers' %}
+                    <span class="emoji">⚠️</span>
+                {% elif category.name == 'Contested Centers' %}
+                    <span class="emoji">🤼</span>
+                {% elif category.name == 'Struggling Centers' %}
+                    <span class="emoji">🏋️</span>
+                {% elif category.name == 'Underperforming Centers' %}
+                    <span class="emoji">🚩</span>
+                {% endif %}
+                <h2>{{ category.name }}</h2>
+                <p>{{ category.range }}</p>
+                <p>{{ category.count }} Centers</p>
+            </a>
+        {% endfor %}
     </div>
 </body>
 </html>
