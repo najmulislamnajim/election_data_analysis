@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+            font-size: 1.8em;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            background-color: rgb(81, 175, 252);
+            color: white;
+        }
+
+        .button-container button:hover {
+            background-color: #ccc;
+        }
+
+        .button-container button:focus {
+            outline: none;
+        }
+
+        .button-container a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .center-count {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .chart-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .chart-container {
+            height: 600px;
+            width: calc(50px * {{ centers|length }} + 100px); /* Dynamic width based on number of centers */
+            min-width: 100%;
+            position: relative;
+        }
+
+        .chartjs-tooltip {
+            opacity: 1;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 3px;
+            padding: 8px;
+            pointer-events: none;
+            font-size: 14px;
+        }
+
+        .chartjs-tooltip-key {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5em; }
+            .button-container { flex-direction: column; align-items: center; }
+            .button-container button { width: 80%; max-width: 300px; font-size: 14px; padding: 8px 15px; }
+            .center-count { font-size: 16px; }
+            .chart-container { height: 300px; }
+            .chartjs-tooltip { font-size: 12px; padding: 6px; }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.2em; }
+            .button-container button { font-size: 12px; padding: 6px 10px; }
+            .center-count { font-size: 14px; }
+            .chart-container { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <button id="ourBtn" onclick="showOurCenters()">Our {{ category_name }}</button>
+        <button id="opponentBtn" onclick="showOpponentCenters()">Opponent {{ category_name }}</button>
+        <a href="{% url 'home' %}" style="text-decoration: none;">
+            <button>Back to Home</button>
+        </a>
+    </div>
+
+    <h1 id="chartTitle">{{ title }}</h1>
+    
+    <div id="centerCount" class="center-count">Total Centers: {{ centers|length }}</div>
+
+    <div class="chart-wrapper">
+        <div class="chart-container">
+            <canvas id="voteCountChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Data from Django view
+        const data = {
+            our_centers: {{ our_centers|safe }},
+            opponent_centers: {{ opponent_centers|safe }}
+        };
+
+        // Initial data (default to "Our" centers)
+        let currentData = data.our_centers;
+
+        // Extract labels and datasets
+        const labels = currentData.map(center => center.center_name);
+        const ourVoteCounts = currentData.map(center => center['7']);
+        const opponentVoteCounts = currentData.map(center => center['2']);
+
+        // Responsive font size function
+        function getFontSize() {
+            if (window.innerWidth < 480) return 8;
+            if (window.innerWidth < 768) return 10;
+            return 12;
+        }
+
+        // Create the chart
+        const ctx = document.getElementById('voteCountChart').getContext('2d');
+        const voteCountChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Our Vote Count',
+                        data: ourVoteCounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
+                    },
+                    {
+                        label: 'Opponent Vote Count',
+                        data: opponentVoteCounts,
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 90,
+                            minRotation: 45,
+                            font: { size: getFontSize() },
+                            autoSkip: false // Show all labels
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Vote Count',
+                            font: { size: getFontSize() + 2 }
+                        },
+                        ticks: { font: { size: getFontSize() } }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: false,
+                        external: function(context) {
+                            let tooltipEl = document.getElementById('chartjs-tooltip');
+                            if (!tooltipEl) {
+                                tooltipEl = document.createElement('div');
+                                tooltipEl.id = 'chartjs-tooltip';
+                                tooltipEl.className = 'chartjs-tooltip';
+                                document.body.appendChild(tooltipEl);
+                            }
+
+                            const tooltipModel = context.tooltip;
+                            if (tooltipModel.opacity === 0) {
+                                tooltipEl.style.opacity = 0;
+                                return;
+                            }
+
+                            if (tooltipModel.body) {
+                                const index = tooltipModel.dataPoints[0].dataIndex;
+                                const ourCount = context.chart.data.datasets[0].data[index];
+                                const opponentCount = context.chart.data.datasets[1].data[index];
+                                const centerName = context.chart.data.labels[index];
+
+                                tooltipEl.innerHTML = `
+                                    <div>${centerName}</div>
+                                    <div>
+                                        <span class="chartjs-tooltip-key" style="background-color: rgba(54, 162, 235, 1);"></span>
+                                        Our Vote Count: ${ourCount}
+                                    </div>
+                                    <div>
+                                        <span class="chartjs-tooltip-key" style="background-color: rgba(255, 99, 132, 1);"></span>
+                                        Opponent Vote Count: ${opponentCount}
+                                    </div>
+                                `;
+                            }
+
+                            const position = context.chart.canvas.getBoundingClientRect();
+                            tooltipEl.style.opacity = 1;
+                            tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+                            tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
+                        }
+                    }
+                }
+            }
+        });
+
+        // Show "Our" centers
+        function showOurCenters() {
+            currentData = data.our_centers;
+            updateChartData(currentData);
+            document.getElementById('chartTitle').textContent = "Our {{ title }}";
+            document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+            adjustChartWidth(currentData.length);
+        }
+
+        // Show "Opponent" centers
+        function showOpponentCenters() {
+            currentData = data.opponent_centers;
+            updateChartData(currentData);
+            document.getElementById('chartTitle').textContent = "Opponent {{ title }}";
+            document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+            adjustChartWidth(currentData.length);
+        }
+
+        // Update chart data
+        function updateChartData(centerData) {
+            voteCountChart.data.labels = centerData.map(center => center.center_name);
+            voteCountChart.data.datasets[0].data = centerData.map(center => center['7']);
+            voteCountChart.data.datasets[1].data = centerData.map(center => center['2']);
+            voteCountChart.update();
+        }
+
+        // Adjust chart width dynamically
+        function adjustChartWidth(centerCount) {
+            const chartContainer = document.querySelector('.chart-container');
+            const newWidth = Math.max(1000, 50 * centerCount + 100); // 50px per bar + padding
+            chartContainer.style.width = `${newWidth}px`;
+        }
+
+        // Initialize with "Our" centers
+        showOurCenters();
+
+        // Update font sizes on resize
+        window.addEventListener('resize', () => {
+            const fontSize = getFontSize();
+            voteCountChart.options.scales.x.ticks.font.size = fontSize;
+            voteCountChart.options.scales.y.ticks.font.size = fontSize;
+            voteCountChart.options.scales.y.title.font.size = fontSize + 2;
+            voteCountChart.update();
+        });
+    </script>
+</body>
+</html>
