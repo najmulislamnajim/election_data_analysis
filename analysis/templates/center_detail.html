@@ -38,10 +38,19 @@
             margin-top: 10px;
         }
 
-        /* Chart container */
-        .chart-container {
+        /* Chart wrapper and container */
+        .chart-wrapper {
             width: 80%;
             margin: auto;
+            overflow-x: auto; /* Horizontal scrollbar */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+        }
+
+        .chart-container {
+            height: 600px; /* Fixed height */
+            width: calc(50px * {{ centers|length }} + 100px); /* Dynamic width based on centers */
+            min-width: 100%; /* Fills wrapper if fewer centers */
+            position: relative;
         }
 
         /* Heading Style */
@@ -81,9 +90,7 @@
         <button id="ourBtn" onclick="showOurCenters()">Our {{ category_name }}</button>
         <button id="opponentBtn" onclick="showOpponentCenters()">Opponent {{ category_name }}</button>
         <a href="{% url 'home' %}" style="text-decoration: none;">
-            <button>
-                Back to Home
-            </button>
+            <button>Back to Home</button>
         </a>   
     </div>
 
@@ -94,8 +101,10 @@
     <div id="centerCount" class="center-count">Total Centers: {{ centers|length }}</div>
 
     <!-- Canvas for Chart -->
-    <div class="chart-container">
-        <canvas id="voteRateChart"></canvas>
+    <div class="chart-wrapper">
+        <div class="chart-container">
+            <canvas id="voteRateChart"></canvas>
+        </div>
     </div>
 
     <script>
@@ -125,25 +134,30 @@
                         data: ourVoteRates,
                         backgroundColor: 'rgba(54, 162, 235, 0.8)', // Blue
                         borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
                     },
                     {
                         label: 'Opponent Vote Rate',
                         data: opponentVoteRates,
                         backgroundColor: 'rgba(255, 99, 132, 0.8)', // Red
                         borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
                     }
                 ]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, /* Prevents stretching with fixed height */
                 scales: {
                     x: {
-                        tickRotation: 45,
                         ticks: {
                             maxRotation: 90,
-                            minRotation: 45
+                            minRotation: 45,
+                            autoSkip: false /* Show all labels */
                         }
                     },
                     y: {
@@ -207,6 +221,7 @@
             updateChartData(currentData);
             document.getElementById('chartTitle').textContent = "Our {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+            adjustChartWidth(currentData.length);
         }
 
         // Show "Opponent" centers
@@ -215,6 +230,7 @@
             updateChartData(currentData);
             document.getElementById('chartTitle').textContent = "Opponent {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+            adjustChartWidth(currentData.length);
         }
 
         // Update chart data
@@ -223,6 +239,13 @@
             voteRateChart.data.datasets[0].data = centerData.map(center => center.our_vote_rate);
             voteRateChart.data.datasets[1].data = centerData.map(center => center.opponent_vote_rate);
             voteRateChart.update();
+        }
+
+        // Adjust chart width dynamically
+        function adjustChartWidth(centerCount) {
+            const chartContainer = document.querySelector('.chart-container');
+            const newWidth = Math.max(960, 50 * centerCount + 100); // 960px = 80% of 1200px
+            chartContainer.style.width = `${newWidth}px`;
         }
 
         // Initialize with "Our" centers
