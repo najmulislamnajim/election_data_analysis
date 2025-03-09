@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 30px; color: #333; }
+        h1 { text-align: center; margin-bottom: 30px;padding: 10px;display: block;background-color: #ffffff;border: 1px solid #ddd;border-radius: 8px;box-shadow: 0 4px 15px rgba(81, 175, 252, 0.5), 0 6px 20px rgba(255, 99, 132, 0.3);padding: 15px 25px;color: #333;font-size: 1.8em; width: fit-content; margin-left: auto; margin-right: auto;}
         .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
         .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 20px; text-align: center; transition: transform 0.3s ease; text-decoration: none; color: inherit; display: block; }
         .card:hover { transform: translateY(-5px); }
@@ -15,14 +15,14 @@
         .card p { font-size: 1em; color: #666; }
         .emoji { font-size: 2em; margin-bottom: 10px; display: block; transition: transform 0.3s ease; }
         .card:hover .emoji { transform: scale(1.2); }
-        .strongest { border-top: 5px solid #2ecc71; }
-        .winning_by_percentage { border-top: 5px solid #2ecc71; }
-        .strong { border-top: 5px solid #3498db; }
-        .critical { border-top: 5px solid #f1c40f; }
-        .competitive { border-top: 5px solid #e67e22; }
-        .weak { border-top: 5px solid #e74c3c; }
-        .losing_by_percentage { border-top: 5px solid #e74c3c; }
-        .very-weak { border-top: 5px solid #95a5a6; }
+        .strongest_count, .strongest_rate { border-top: 5px solid #2ecc71; }
+        .winning_count, .winning_rate { border-top: 5px solid #2ecc71; }
+        .strong_count, .strong_rate { border-top: 5px solid #3498db; }
+        .critical_count, .critical_rate { border-top: 5px solid #f1c40f; }
+        .competitive_count, .competitive_rate { border-top: 5px solid #e67e22; }
+        .weak_count, .weak_rate { border-top: 5px solid #e74c3c; }
+        .losing_count, .losing_rate { border-top: 5px solid #e74c3c; }
+        .very-weak_count, .very-weak_rate { border-top: 5px solid #95a5a6; }
         @media (max-width: 600px) {
             .card-container { grid-template-columns: 1fr; }
             .card h2 { font-size: 1.2em; }
@@ -34,12 +34,12 @@
 <body>
     <h1>Vote Center Analysis by Percentage</h1>
     <div class="card-container">
-        {% for category in categories %}
+        {% for category in rate_categories %}
             <a href="{% url category.url_name %}" class="card {{ category.url_name|cut:'_centers' }}">
                 {% if category.name == 'Winning Centers' %}
                     <span class="emoji">🏆</span>
                 {% elif category.name == 'Losing Centers' %}
-                    <span class="emoji">💔</span>
+                    <span class="emoji">📉</span>
                 {% elif category.name == 'Dominant Centers' %}
                     <span class="emoji">👑</span>
                 {% elif category.name == 'Solid Centers' %}
@@ -60,6 +60,32 @@
         {% endfor %}
     </div>
 
-    <!-- <h1>Vote Center Analysis by Vote Count</h1> -->
+    <h1 style="margin-top: 30px;">Vote Center Analysis by Vote Count</h1>
+    <div class="card-container">
+        {% for category in count_categories %}
+            <a href="{% url category.url_name %}" class="card {{ category.url_name|cut:'_centers' }}">
+                {% if category.name == 'Winning Centers' %}
+                    <span class="emoji">🏆</span>
+                {% elif category.name == 'Losing Centers' %}
+                    <span class="emoji">📉</span>
+                {% elif category.name == 'Dominant Centers' %}
+                    <span class="emoji">👑</span>
+                {% elif category.name == 'Solid Centers' %}
+                    <span class="emoji">💪</span>
+                {% elif category.name == 'Critical Centers' %}
+                    <span class="emoji">⚠️</span>
+                {% elif category.name == 'Contested Centers' %}
+                    <span class="emoji">🤼</span>
+                {% elif category.name == 'Struggling Centers' %}
+                    <span class="emoji">🏋️</span>
+                {% elif category.name == 'Underperforming Centers' %}
+                    <span class="emoji">🚩</span>
+                {% endif %}
+                <h2>{{ category.name }}</h2>
+                <p>{{ category.range }}</p>
+                <p>{{ category.count }} Centers</p>
+            </a>
+        {% endfor %}
+    </div>
 </body>
 </html>
