@@ -38,6 +38,15 @@ def analyze_election_data():
     our_underperforming_centers = df[df['our_vote_rate'] < 20][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate']]
     opponent_underperforming_centers = df[df['opponent_vote_rate'] < 20][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate']]
     
+    # Winning Centers
+    our_winning_centers = df[df['7'] > df['2']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate','7']]
+    opponent_winning_centers = df[df['2'] > df['7']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '2']]
+    
+    # Losing Centers
+    our_losing_centers = df[df['7'] < df['2']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7']]
+    opponent_losing_centers = df[df['2'] < df['7']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '2']]
+    
+    
     # Python dict list
     our_strong_centers_list = our_strong_centers.to_dict(orient='records')
     opponent_strong_centers_list = opponent_strong_centers.to_dict(orient='records')
@@ -54,6 +63,10 @@ def analyze_election_data():
         'opponent_struggling_centers': opponent_struggling_centers.to_dict(orient='records'),
         'our_underperforming_centers': our_underperforming_centers.to_dict(orient='records'),
         'opponent_underperforming_centers': opponent_underperforming_centers.to_dict(orient='records'),
+        'our_winning_centers': our_winning_centers.to_dict(orient='records'),
+        'opponent_winning_centers': opponent_winning_centers.to_dict(orient='records'),
+        'our_losing_centers': our_losing_centers.to_dict(orient='records'),
+        'opponent_losing_centers': opponent_losing_centers.to_dict(orient='records'),
     }
     
     return data
