@@ -80,11 +80,11 @@
     <div class="button-container">
         <button id="ourBtn" onclick="showOurCenters()">Our {{ category_name }}</button>
         <button id="opponentBtn" onclick="showOpponentCenters()">Opponent {{ category_name }}</button>
-        <button id="home">
-            <a href="{% url 'home' %}" style="text-decoration: none;">Back to Home</a>
-        </button>
-        
-
+        <a href="{% url 'home' %}" style="text-decoration: none;">
+            <button>
+                Back to Home
+            </button>
+        </a>   
     </div>
 
     <!-- Dynamic Heading -->
