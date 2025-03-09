@@ -9,4 +9,7 @@ urlpatterns = [
     path('centers/contested/', views.center_detail, name='competitive_centers'),
     path('centers/struggling/', views.center_detail, name='weak_centers'),
     path('centers/underperforming/', views.center_detail, name='very_weak_centers'),
+    path('centers/winning_by_percentage/', views.center_detail, name='winning_centers_by_percentage'),
+    path('centers/losing_by_percentage/', views.center_detail, name='losing_centers_by_percentage'),
+    path('centers/winning_by_count/', views.center_detail, name='winning_centers_by_count'),
 ]
