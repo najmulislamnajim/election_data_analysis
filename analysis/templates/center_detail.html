@@ -42,14 +42,14 @@
         .chart-wrapper {
             width: 80%;
             margin: auto;
-            overflow-x: auto; /* Horizontal scrollbar */
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .chart-container {
-            height: 600px; /* Fixed height */
-            width: calc(50px * {{ centers|length }} + 100px); /* Dynamic width based on centers */
-            min-width: 100%; /* Fills wrapper if fewer centers */
+            height: 600px;
+            width: calc(50px * {{ centers|length }} + 100px);
+            min-width: 100%;
             position: relative;
         }
 
@@ -75,6 +75,116 @@
             width: 10px;
             height: 10px;
             margin-right: 5px;
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            width: 80%;
+            margin: 20px auto;
+            display: none; /* Initially hidden */
+        }
+
+        .table-container {
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-collapse: collapse;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed; /* Fixes column widths */
+        }
+
+        thead, tfoot {
+            display: table;
+            width: 100%;
+        }
+
+        tbody {
+            display: block;
+            max-height: 400px; /* Adjusted for ~10 rows */
+            overflow-y: auto; /* Only tbody scrolls */
+            overflow-x: hidden; /* Prevents horizontal scroll in tbody */
+            width: 100%;
+        }
+
+        tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            min-width: 100px;
+        }
+
+        thead th {
+            background-color: rgb(81, 175, 252);
+            color: white;
+            font-weight: bold;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        tfoot td {
+            font-weight: bold;
+            background-color: #e0f7fa;
+            border-top: 1px solid #ddd; /* Separates from tbody */
+        }
+
+        /* Toggle Button Style */
+        .toggle-table-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: rgb(81, 175, 252);
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-table-btn:hover {
+            background-color: #ccc;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1440px) {
+            .chart-wrapper, .table-wrapper {
+                width: 90%;
+            }
+            th, td {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 1366px) {
+            .chart-wrapper, .table-wrapper {
+                width: 95%;
+            }
+            th, td {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+            .chart-container {
+                height: 500px;
+            }
+            tbody {
+                max-height: 350px; /* Adjusted for smaller screens */
+            }
         }
 
         body {
@@ -104,6 +214,35 @@
     <div class="chart-wrapper">
         <div class="chart-container">
             <canvas id="voteRateChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Toggle Table Button -->
+    <button class="toggle-table-btn" onclick="toggleTable()">Show Table</button>
+
+    <!-- Table for Detailed Data -->
+    <div class="table-wrapper" id="tableWrapper">
+        <div class="table-container">
+            <table id="centersTable">
+                <thead>
+                    <tr>
+                        <th>Serial No.</th>
+                        <th>Center Name</th>
+                        <th>Total Voter</th>
+                        <th>Total Legal Vote</th>
+                        <th>Our Vote</th>
+                        <th>Opponent Vote</th>
+                        <th>Vote Difference</th>
+                        <th>Vote Difference by Percentage</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+                <tfoot id="tableFooter">
+                    <!-- Total row populated by JavaScript -->
+                </tfoot>
+            </table>
         </div>
     </div>
 
@@ -151,13 +290,13 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, /* Prevents stretching with fixed height */
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         ticks: {
                             maxRotation: 90,
                             minRotation: 45,
-                            autoSkip: false /* Show all labels */
+                            autoSkip: false
                         }
                     },
                     y: {
@@ -219,6 +358,7 @@
         function showOurCenters() {
             currentData = data.our_centers;
             updateChartData(currentData);
+            updateTableData(currentData);
             document.getElementById('chartTitle').textContent = "Our {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
             adjustChartWidth(currentData.length);
@@ -228,6 +368,7 @@
         function showOpponentCenters() {
             currentData = data.opponent_centers;
             updateChartData(currentData);
+            updateTableData(currentData);
             document.getElementById('chartTitle').textContent = "Opponent {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
             adjustChartWidth(currentData.length);
@@ -241,11 +382,82 @@
             voteRateChart.update();
         }
 
+        // Update table data with Serial No. and Total
+        function updateTableData(centerData) {
+            const tableBody = document.getElementById('tableBody');
+            const tableFooter = document.getElementById('tableFooter');
+            tableBody.innerHTML = ''; // Clear existing rows
+            tableFooter.innerHTML = ''; // Clear existing footer
+
+            let totalVoters = 0;
+            let totalLegalVotes = 0;
+            let totalOurVotes = 0;
+            let totalOpponentVotes = 0;
+            let totalVoteDifference = 0;
+
+            centerData.forEach((center, index) => {
+                const ourVote = center['7'] || 0;
+                const opponentVote = center['2'] || 0;
+                const totalVoter = center.total_voter || 0;
+                const totalLegalVote = center.total_legal_vote || 0;
+                const voteDifference = ourVote - opponentVote;
+                const voteDifferencePercentage = totalLegalVote > 0 ? ((voteDifference / totalLegalVote) * 100).toFixed(2) : 0;
+
+                // Update totals
+                totalVoters += totalVoter;
+                totalLegalVotes += totalLegalVote;
+                totalOurVotes += ourVote;
+                totalOpponentVotes += opponentVote;
+                totalVoteDifference += voteDifference;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${center.center_name || 'Unknown'}</td>
+                    <td>${totalVoter}</td>
+                    <td>${totalLegalVote}</td>
+                    <td>${ourVote}</td>
+                    <td>${opponentVote}</td>
+                    <td>${voteDifference}</td>
+                    <td>${voteDifferencePercentage}%</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Add Total Row to Footer
+            const totalRow = document.createElement('tr');
+            const totalDifferencePercentage = totalLegalVotes > 0 ? ((totalVoteDifference / totalLegalVotes) * 100).toFixed(2) : 0;
+            totalRow.innerHTML = `
+                <td>Total</td>
+                <td>-</td>
+                <td>${totalVoters}</td>
+                <td>${totalLegalVotes}</td>
+                <td>${totalOurVotes}</td>
+                <td>${totalOpponentVotes}</td>
+                <td>${totalVoteDifference}</td>
+                <td>${totalDifferencePercentage}%</td>
+            `;
+            tableFooter.appendChild(totalRow);
+        }
+
         // Adjust chart width dynamically
         function adjustChartWidth(centerCount) {
             const chartContainer = document.querySelector('.chart-container');
-            const newWidth = Math.max(960, 50 * centerCount + 100); // 960px = 80% of 1200px
+            const newWidth = Math.max(960, 50 * centerCount + 100);
             chartContainer.style.width = `${newWidth}px`;
+        }
+
+        // Toggle table visibility
+        function toggleTable() {
+            const tableWrapper = document.getElementById('tableWrapper');
+            const toggleBtn = document.querySelector('.toggle-table-btn');
+            if (tableWrapper.style.display === 'none' || tableWrapper.style.display === '') {
+                tableWrapper.style.display = 'block';
+                toggleBtn.textContent = 'Hide Table';
+            } else {
+                tableWrapper.style.display = 'none';
+                toggleBtn.textContent = 'Show Table';
+            }
         }
 
         // Initialize with "Our" centers
