@@ -18,37 +18,49 @@ def analyze_election_data():
     df['opponent_vote_rate'] = df['opponent_vote_rate'].round(2)
 
     # Strongest center >= 80% vote cast
-    our_strongest_centers = df[df['our_vote_rate'] >= 80][['id', 'center_name', 'our_vote_rate','opponent_vote_rate', '7', '2']]
-    opponent_strongest_centers = df[df['opponent_vote_rate'] >= 80][['id', 'center_name', 'our_vote_rate','opponent_vote_rate', '7', '2']]
+    our_strongest_centers = df[df['our_vote_rate'] >= 80][['id', 'center_name', 'our_vote_rate','opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_strongest_centers = df[df['opponent_vote_rate'] >= 80][['id', 'center_name', 'our_vote_rate','opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
     
     # strong center >= 60% and < 80% vote cast
-    our_strong_centers = df[(df['our_vote_rate'] >= 60) & (df['our_vote_rate'] < 80)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
-    opponent_strong_centers = df[(df['opponent_vote_rate'] >= 60) & (df['opponent_vote_rate'] < 80)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
+    our_strong_centers = df[(df['our_vote_rate'] >= 60) & (df['our_vote_rate'] < 80)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_strong_centers = df[(df['opponent_vote_rate'] >= 60) & (df['opponent_vote_rate'] < 80)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
     
     # critical center >= 50% and < 59% vote cast
-    our_critical_centers = df[(df['our_vote_rate'] >= 50) & (df['our_vote_rate'] < 59)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
-    opponent_critical_centers = df[(df['opponent_vote_rate'] >= 50) & (df['opponent_vote_rate'] < 59)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
+    our_critical_centers = df[(df['our_vote_rate'] >= 50) & (df['our_vote_rate'] < 59)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_critical_centers = df[(df['opponent_vote_rate'] >= 50) & (df['opponent_vote_rate'] < 59)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
     
     # competitive center >= 40% and < 49% vote cast
-    our_competitive_centers = df[(df['our_vote_rate'] >= 40) & (df['our_vote_rate'] < 49)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
-    opponent_competitive_centers = df[(df['opponent_vote_rate'] >= 40) & (df['opponent_vote_rate'] < 49)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
+    our_competitive_centers = df[(df['our_vote_rate'] >= 40) & (df['our_vote_rate'] < 49)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_competitive_centers = df[(df['opponent_vote_rate'] >= 40) & (df['opponent_vote_rate'] < 49)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
     
     # Struggling center >= 20% and < 39% vote cast
-    our_struggling_centers = df[(df['our_vote_rate'] >= 20) & (df['our_vote_rate'] < 39)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
-    opponent_struggling_centers = df[(df['opponent_vote_rate'] >= 20) & (df['opponent_vote_rate'] < 39)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
+    our_struggling_centers = df[(df['our_vote_rate'] >= 20) & (df['our_vote_rate'] < 39)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_struggling_centers = df[(df['opponent_vote_rate'] >= 20) & (df['opponent_vote_rate'] < 39)][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
     
     # Underperforming center  < 20% vote cast
-    our_underperforming_centers = df[df['our_vote_rate'] < 20][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
-    opponent_underperforming_centers = df[df['opponent_vote_rate'] < 20][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
+    our_underperforming_centers = df[df['our_vote_rate'] < 20][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_underperforming_centers = df[df['opponent_vote_rate'] < 20][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
     
     # Winning Centers
-    our_winning_centers = df[df['7'] > df['2']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate','7', '2']]
-    opponent_winning_centers = df[df['2'] > df['7']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
+    our_winning_centers = df[df['7'] > df['2']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate','7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_winning_centers = df[df['2'] > df['7']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
     
     # Losing Centers
-    our_losing_centers = df[df['7'] < df['2']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2']]
-    opponent_losing_centers = df[df['2'] < df['7']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate','7', '2']]
+    our_losing_centers = df[df['7'] < df['2']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate', '7', '2', 'total_voter', 'total_legal_vote']]
+    opponent_losing_centers = df[df['2'] < df['7']][['id', 'center_name', 'our_vote_rate', 'opponent_vote_rate','7', '2', 'total_voter', 'total_legal_vote']]
     
+    total_voters = df['total_voter'].sum()
+    total_legal_votes = df['total_legal_vote'].sum()
+    total_cancelled_votes = df['total_cancelled_vote'].sum()
+    total_votes = df['total_vote'].sum()
+    total_vote_rate = df['total_vote_rate'].sum()
+    our_casted_votes = df['7'].sum()
+    opponent_casted_votes = df['2'].sum()
+    total_centers = df['id'].count()
+    our_total_winning_centers =our_winning_centers.count()
+    opponent_total_winning_centers = opponent_winning_centers.count()
+    our_total_losing_centers = our_losing_centers.count()
+    opponent_total_losing_centers = opponent_losing_centers.count()
     
     data ={
         'our_strong_centers': our_strong_centers.to_dict(orient='records'),
