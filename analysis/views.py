@@ -46,7 +46,7 @@ def center_detail(request):
         'struggling_rate': ('Struggling Centers (20% to 39%)', data['our_struggling_centers'], data['opponent_struggling_centers']),
         'underperforming_rate': ('Underperforming Centers (Below 20%)', data['our_underperforming_centers'], data['opponent_underperforming_centers']),
         'winning_rate': ('Winning Centers (More than opponent percentage)', data['our_winning_centers'], data['opponent_winning_centers']),
-        'losing_by_rate': ('Losing Centers (Less than opponent percentage)', data['our_losing_centers'], data['opponent_losing_centers']),
+        'losing_rate': ('Losing Centers (Less than opponent percentage)', data['our_losing_centers'], data['opponent_losing_centers']),
     }
 
     title, our_centers, opponent_centers = category_map.get(category, ('Unknown Category', [], []))
