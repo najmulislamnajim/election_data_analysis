@@ -9,6 +9,7 @@ def analyze_election_data():
     
     # Sort Data
     df = df.sort_values(by='total_voter')
+    df['center_name'] = df['center_name'].apply(lambda x: ','.join(x.rsplit(',', 1)[:-1]) if ',' in x else x)
     
     # Calculate vote percentages
     df['our_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['7'] / df['total_legal_vote']) * 100, 0)
