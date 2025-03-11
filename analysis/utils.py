@@ -57,10 +57,10 @@ def analyze_election_data():
     our_casted_votes = df['7'].sum()
     opponent_casted_votes = df['2'].sum()
     total_centers = df['id'].count()
-    our_total_winning_centers =our_winning_centers.count()
-    opponent_total_winning_centers = opponent_winning_centers.count()
-    our_total_losing_centers = our_losing_centers.count()
-    opponent_total_losing_centers = opponent_losing_centers.count()
+    our_total_winning_centers =our_winning_centers['id'].count()
+    opponent_total_winning_centers = opponent_winning_centers['id'].count()
+    our_total_losing_centers = our_losing_centers['id'].count()
+    opponent_total_losing_centers = opponent_losing_centers['id'].count()
     
     data ={
         'our_strong_centers': our_strong_centers.to_dict(orient='records'),
@@ -79,8 +79,17 @@ def analyze_election_data():
         'opponent_winning_centers': opponent_winning_centers.to_dict(orient='records'),
         'our_losing_centers': our_losing_centers.to_dict(orient='records'),
         'opponent_losing_centers': opponent_losing_centers.to_dict(orient='records'),
+        'total_centers': total_centers,
+        'winning_centers': our_total_winning_centers,
+        'losing_centers': our_total_losing_centers,
+        'total_voters': total_voters,
+        'total_legal_votes': total_legal_votes,
+        'total_cancelled_votes': total_cancelled_votes,
+        'total_votes': total_votes,
+        'total_vote_rate': total_vote_rate,
+        'our_casted_votes': our_casted_votes,
+        'opponent_casted_votes': opponent_casted_votes,
     }
-    
     return data
 
 
