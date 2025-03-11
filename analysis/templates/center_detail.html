@@ -81,65 +81,42 @@
         .table-wrapper {
             width: 80%;
             margin: 20px auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             display: none; /* Initially hidden */
-        }
-
-        .table-container {
-            width: 100%;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-collapse: collapse;
         }
 
         table {
             width: 100%;
-            table-layout: fixed; /* Fixes column widths */
-        }
-
-        thead, tfoot {
-            display: table;
-            width: 100%;
-        }
-
-        tbody {
-            display: block;
-            max-height: 400px; /* Adjusted for ~10 rows */
-            overflow-y: auto; /* Only tbody scrolls */
-            overflow-x: hidden; /* Prevents horizontal scroll in tbody */
-            width: 100%;
-        }
-
-        tr {
-            display: table;
-            width: 100%;
-            table-layout: fixed;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         th, td {
             padding: 12px 15px;
             text-align: center;
             border-bottom: 1px solid #ddd;
-            min-width: 100px;
         }
 
-        thead th {
+        th {
             background-color: rgb(81, 175, 252);
             color: white;
             font-weight: bold;
         }
 
-        tbody tr:nth-child(even) {
+        tr:nth-child(even) {
             background-color: #f9f9f9;
         }
 
-        tbody tr:hover {
+        tr:hover {
             background-color: #f1f1f1;
         }
 
-        tfoot td {
+        /* Total Row Style */
+        .total-row {
             font-weight: bold;
-            background-color: #e0f7fa;
-            border-top: 1px solid #ddd; /* Separates from tbody */
+            background-color: #e0f7fa; /* Light cyan for distinction */
         }
 
         /* Toggle Button Style */
@@ -182,9 +159,6 @@
             .chart-container {
                 height: 500px;
             }
-            tbody {
-                max-height: 350px; /* Adjusted for smaller screens */
-            }
         }
 
         body {
@@ -222,28 +196,23 @@
 
     <!-- Table for Detailed Data -->
     <div class="table-wrapper" id="tableWrapper">
-        <div class="table-container">
-            <table id="centersTable">
-                <thead>
-                    <tr>
-                        <th>Serial No.</th>
-                        <th>Center Name</th>
-                        <th>Total Voter</th>
-                        <th>Total Legal Vote</th>
-                        <th>Our Vote</th>
-                        <th>Opponent Vote</th>
-                        <th>Vote Difference</th>
-                        <th>Vote Difference by Percentage</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Populated by JavaScript -->
-                </tbody>
-                <tfoot id="tableFooter">
-                    <!-- Total row populated by JavaScript -->
-                </tfoot>
-            </table>
-        </div>
+        <table id="centersTable">
+            <thead>
+                <tr>
+                    <th>Serial No.</th>
+                    <th>Center Name</th>
+                    <th>Total Voter</th>
+                    <th>Total Legal Vote</th>
+                    <th>Our Vote</th>
+                    <th>Opponent Vote</th>
+                    <th>Vote Difference</th>
+                    <th>Vote Difference by Percentage</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Populated by JavaScript -->
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -385,9 +354,7 @@
         // Update table data with Serial No. and Total
         function updateTableData(centerData) {
             const tableBody = document.getElementById('tableBody');
-            const tableFooter = document.getElementById('tableFooter');
             tableBody.innerHTML = ''; // Clear existing rows
-            tableFooter.innerHTML = ''; // Clear existing footer
 
             let totalVoters = 0;
             let totalLegalVotes = 0;
@@ -424,8 +391,9 @@
                 tableBody.appendChild(row);
             });
 
-            // Add Total Row to Footer
+            // Add Total Row
             const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
             const totalDifferencePercentage = totalLegalVotes > 0 ? ((totalVoteDifference / totalLegalVotes) * 100).toFixed(2) : 0;
             totalRow.innerHTML = `
                 <td>Total</td>
@@ -437,7 +405,7 @@
                 <td>${totalVoteDifference}</td>
                 <td>${totalDifferencePercentage}%</td>
             `;
-            tableFooter.appendChild(totalRow);
+            tableBody.appendChild(totalRow);
         }
 
         // Adjust chart width dynamically
