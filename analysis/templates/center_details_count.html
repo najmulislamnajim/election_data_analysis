@@ -76,7 +76,7 @@
 
         .chart-container {
             height: 600px;
-            width: calc(50px * {{ centers|length }} + 100px); /* Dynamic width based on number of centers */
+            width: calc(50px * {{ centers|length }} + 100px);
             min-width: 100%;
             position: relative;
         }
@@ -105,7 +105,7 @@
             margin: 20px auto;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            display: none; /* Initially hidden */
+            display: none;
         }
 
         table {
@@ -125,6 +125,23 @@
             background-color: rgb(81, 175, 252);
             color: white;
             font-weight: bold;
+            cursor: pointer; /* Indicates clickable */
+        }
+
+        th .sort-arrows {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        th .sort-arrows span {
+            font-size: 20px;
+            opacity: 0.5; /* Inactive state */
+            transition: opacity 0.3s;
+        }
+
+        th .sort-arrows .active {
+            opacity: 1; /* Active state */
+            font-weight: bold;
         }
 
         tr:nth-child(even) {
@@ -135,13 +152,11 @@
             background-color: #f1f1f1;
         }
 
-        /* Total Row Style */
         .total-row {
             font-weight: bold;
-            background-color: #e0f7fa; /* Light cyan for distinction */
+            background-color: #e0f7fa;
         }
 
-        /* Toggle Button Style */
         .toggle-table-btn {
             display: block;
             margin: 20px auto;
@@ -175,28 +190,15 @@
             .chart-container { height: 250px; }
         }
 
-        /* Responsive Adjustments */
         @media (max-width: 1440px) {
-            .chart-wrapper, .table-wrapper {
-                width: 90%;
-            }
-            th, td {
-                padding: 10px 12px;
-                font-size: 14px;
-            }
+            .chart-wrapper, .table-wrapper { width: 90%; }
+            th, td { padding: 10px 12px; font-size: 14px; }
         }
 
         @media (max-width: 1366px) {
-            .chart-wrapper, .table-wrapper {
-                width: 95%;
-            }
-            th, td {
-                padding: 8px 10px;
-                font-size: 12px;
-            }
-            .chart-container {
-                height: 500px;
-            }
+            .chart-wrapper, .table-wrapper { width: 95%; }
+            th, td { padding: 8px 10px; font-size: 12px; }
+            .chart-container { height: 500px; }
         }
     </style>
 </head>
@@ -204,7 +206,7 @@
     <div class="button-container">
         <button id="ourBtn" onclick="showOurCenters()">Our {{ category_name }}</button>
         <button id="opponentBtn" onclick="showOpponentCenters()">Opponent {{ category_name }}</button>
-        <a href="{% url 'home' %}" style="text-decoration: none;">
+        <a href="{% url 'home' %}">
             <button>Back to Home</button>
         </a>
     </div>
@@ -219,22 +221,20 @@
         </div>
     </div>
 
-    <!-- Toggle Table Button -->
     <button class="toggle-table-btn" onclick="toggleTable()">Show Table</button>
 
-    <!-- Table for Detailed Data -->
     <div class="table-wrapper" id="tableWrapper">
         <table id="centersTable">
             <thead>
                 <tr>
                     <th>Serial No.</th>
                     <th>Center Name</th>
-                    <th>Total Voter</th>
-                    <th>Total Legal Vote</th>
-                    <th>Our Vote</th>
-                    <th>Opponent Vote</th>
-                    <th>Vote Difference</th>
-                    <th>Vote Difference by Percentage</th>
+                    <th onclick="sortTable('total_voter')">Total Voter<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
+                    <th onclick="sortTable('total_legal_vote')">Total Legal Vote<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
+                    <th onclick="sortTable('our_vote')">Our Vote<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
+                    <th onclick="sortTable('opponent_vote')">Opponent Vote<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
+                    <th onclick="sortTable('vote_difference')">Vote Difference<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
+                    <th onclick="sortTable('vote_difference_percentage')">Vote Difference by Percentage<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -244,28 +244,33 @@
     </div>
 
     <script>
-        // Data from Django view
         const data = {
             our_centers: {{ our_centers|safe }},
             opponent_centers: {{ opponent_centers|safe }}
         };
 
-        // Initial data (default to "Our" centers)
         let currentData = data.our_centers;
 
-        // Extract labels and datasets
+        // Sort state
+        let sortStates = {
+            total_voter: null, // null (unsorted), 'asc', 'desc'
+            total_legal_vote: null,
+            our_vote: null,
+            opponent_vote: null,
+            vote_difference: null,
+            vote_difference_percentage: null
+        };
+
         const labels = currentData.map(center => center.center_name);
         const ourVoteCounts = currentData.map(center => center['7']);
         const opponentVoteCounts = currentData.map(center => center['2']);
 
-        // Responsive font size function
         function getFontSize() {
             if (window.innerWidth < 480) return 8;
             if (window.innerWidth < 768) return 10;
             return 12;
         }
 
-        // Create the chart
         const ctx = document.getElementById('voteCountChart').getContext('2d');
         const voteCountChart = new Chart(ctx, {
             type: 'bar',
@@ -301,7 +306,7 @@
                             maxRotation: 90,
                             minRotation: 45,
                             font: { size: getFontSize() },
-                            autoSkip: false // Show all labels
+                            autoSkip: false
                         }
                     },
                     y: {
@@ -361,7 +366,6 @@
             }
         });
 
-        // Show "Our" centers
         function showOurCenters() {
             currentData = data.our_centers;
             updateChartData(currentData);
@@ -369,9 +373,9 @@
             document.getElementById('chartTitle').textContent = "Our {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
             adjustChartWidth(currentData.length);
+            resetSortStates();
         }
 
-        // Show "Opponent" centers
         function showOpponentCenters() {
             currentData = data.opponent_centers;
             updateChartData(currentData);
@@ -379,9 +383,9 @@
             document.getElementById('chartTitle').textContent = "Opponent {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
             adjustChartWidth(currentData.length);
+            resetSortStates();
         }
 
-        // Update chart data
         function updateChartData(centerData) {
             voteCountChart.data.labels = centerData.map(center => center.center_name);
             voteCountChart.data.datasets[0].data = centerData.map(center => center['7']);
@@ -389,30 +393,38 @@
             voteCountChart.update();
         }
 
-        // Adjust chart width dynamically
+        // function adjustChartWidth(centerCount) {
+        //     const chartContainer = document.querySelector('.chart-container');
+        //     const newWidth = Math.max(1000, 50 * centerCount + 100);
+        //     chartContainer.style.width = `${newWidth}px`;
+        // }
         function adjustChartWidth(centerCount) {
             const chartContainer = document.querySelector('.chart-container');
+            const chartWrapper = document.querySelector('.chart-wrapper');
             const newWidth = Math.max(1000, 50 * centerCount + 100); // 50px per bar + padding
             chartContainer.style.width = `${newWidth}px`;
+            // Center the chart on load
+            const scrollWidth = chartContainer.scrollWidth - chartWrapper.clientWidth;
+            chartWrapper.scrollLeft = scrollWidth / 2;
         }
 
-        // Initialize with "Our" centers
-        showOurCenters();
+        function toggleTable() {
+            const tableWrapper = document.getElementById('tableWrapper');
+            const toggleBtn = document.querySelector('.toggle-table-btn');
+            if (tableWrapper.style.display === 'none' || tableWrapper.style.display === '') {
+                tableWrapper.style.display = 'block';
+                toggleBtn.textContent = 'Hide Table';
+            } else {
+                tableWrapper.style.display = 'none';
+                toggleBtn.textContent = 'Show Table';
+            }
+        }
 
-        // Update font sizes on resize
-        window.addEventListener('resize', () => {
-            const fontSize = getFontSize();
-            voteCountChart.options.scales.x.ticks.font.size = fontSize;
-            voteCountChart.options.scales.y.ticks.font.size = fontSize;
-            voteCountChart.options.scales.y.title.font.size = fontSize + 2;
-            voteCountChart.update();
-        });
-
-         // Update table data with Serial No. and Total
-         function updateTableData(centerData) {
+        function updateTableData(centerData) {
             const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = ''; // Clear existing rows
-
+            tableBody.innerHTML = '';
+            
+            const totalCenter = centerData.length;
             let totalVoters = 0;
             let totalLegalVotes = 0;
             let totalOurVotes = 0;
@@ -427,7 +439,6 @@
                 const voteDifference = ourVote - opponentVote;
                 const voteDifferencePercentage = totalLegalVote > 0 ? ((voteDifference / totalLegalVote) * 100).toFixed(2) : 0;
 
-                // Update totals
                 totalVoters += totalVoter;
                 totalLegalVotes += totalLegalVote;
                 totalOurVotes += ourVote;
@@ -448,13 +459,12 @@
                 tableBody.appendChild(row);
             });
 
-            // Add Total Row
             const totalRow = document.createElement('tr');
             totalRow.className = 'total-row';
             const totalDifferencePercentage = totalLegalVotes > 0 ? ((totalVoteDifference / totalLegalVotes) * 100).toFixed(2) : 0;
             totalRow.innerHTML = `
                 <td>Total</td>
-                <td>-</td>
+                <td>${totalCenter}</td>
                 <td>${totalVoters}</td>
                 <td>${totalLegalVotes}</td>
                 <td>${totalOurVotes}</td>
@@ -465,19 +475,78 @@
             tableBody.appendChild(totalRow);
         }
 
-         // Toggle table visibility
-         function toggleTable() {
-            const tableWrapper = document.getElementById('tableWrapper');
-            const toggleBtn = document.querySelector('.toggle-table-btn');
-            if (tableWrapper.style.display === 'none' || tableWrapper.style.display === '') {
-                tableWrapper.style.display = 'block';
-                toggleBtn.textContent = 'Hide Table';
-            } else {
-                tableWrapper.style.display = 'none';
-                toggleBtn.textContent = 'Show Table';
+        function resetSortStates() {
+            for (let key in sortStates) {
+                sortStates[key] = null;
             }
+            document.querySelectorAll('.sort-arrows span').forEach(arrow => {
+                arrow.classList.remove('active');
+            });
         }
 
+        function sortTable(column) {
+            let direction = sortStates[column];
+            if (direction === null || direction === 'desc') {
+                direction = 'asc';
+            } else {
+                direction = 'desc';
+            }
+
+            for (let key in sortStates) {
+                if (key !== column) sortStates[key] = null;
+            }
+            sortStates[column] = direction;
+
+            let sortedData = [...currentData];
+            sortedData.sort((a, b) => {
+                let aValue, bValue;
+                switch (column) {
+                    case 'total_voter':
+                        aValue = a.total_voter || 0;
+                        bValue = b.total_voter || 0;
+                        break;
+                    case 'total_legal_vote':
+                        aValue = a.total_legal_vote || 0;
+                        bValue = b.total_legal_vote || 0;
+                        break;
+                    case 'our_vote':
+                        aValue = a['7'] || 0;
+                        bValue = b['7'] || 0;
+                        break;
+                    case 'opponent_vote':
+                        aValue = a['2'] || 0;
+                        bValue = b['2'] || 0;
+                        break;
+                    case 'vote_difference':
+                        aValue = (a['7'] || 0) - (a['2'] || 0);
+                        bValue = (b['7'] || 0) - (b['2'] || 0);
+                        break;
+                    case 'vote_difference_percentage':
+                        aValue = a.total_legal_vote > 0 ? (((a['7'] || 0) - (a['2'] || 0)) / a.total_legal_vote * 100) : 0;
+                        bValue = b.total_legal_vote > 0 ? (((b['7'] || 0) - (b['2'] || 0)) / b.total_legal_vote * 100) : 0;
+                        break;
+                }
+                return direction === 'asc' ? aValue - bValue : bValue - aValue;
+            });
+
+            updateTableData(sortedData);
+
+            document.querySelectorAll('.sort-arrows span').forEach(arrow => {
+                arrow.classList.remove('active');
+            });
+            const activeArrow = document.querySelector(`th[onclick="sortTable('${column}')"] .sort-arrows .${direction === 'asc' ? 'up' : 'down'}`);
+            if (activeArrow) activeArrow.classList.add('active');
+        }
+
+        showOurCenters();
+
+        window.addEventListener('resize', () => {
+            const fontSize = getFontSize();
+            voteCountChart.options.scales.x.ticks.font.size = fontSize;
+            voteCountChart.options.scales.y.ticks.font.size = fontSize;
+            voteCountChart.options.scales.y.title.font.size = fontSize + 2;
+            voteCountChart.update();
+        });
     </script>
 </body>
 </html>
