@@ -30,7 +30,17 @@ def home(request):
             {'name': 'Contested Centers', 'range': '40% to 49%', 'url_name': 'competitive_centers_count', 'count': len(data['our_competitive_centers'])},
             {'name': 'Struggling Centers', 'range': '20% to 39%', 'url_name': 'weak_centers_count', 'count': len(data['our_struggling_centers'])},
             {'name': 'Underperforming Centers', 'range': 'Below 20%', 'url_name': 'very_weak_centers_count', 'count': len(data['our_underperforming_centers'])},   
-        ]
+        ],
+        'total_centers': data['total_centers'],
+        'winning_centers': data['winning_centers'],
+        'losing_centers': data['losing_centers'],
+        'total_voters': data['total_voters'],
+        'total_legal_votes': data['total_legal_votes'],
+        'total_cancelled_votes': data['total_cancelled_votes'],
+        'total_votes': data['total_votes'],
+        'total_vote_rate': data['total_vote_rate'],
+        'our_casted_votes': data['our_casted_votes'],
+        'opponent_casted_votes': data['opponent_casted_votes'],
     }
     return render(request, 'home.html', context)
 
