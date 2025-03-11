@@ -1,91 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Election Data Analysis</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Election Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 30px;padding: 10px;display: block;background-color: #ffffff;border: 1px solid #ddd;border-radius: 8px;box-shadow: 0 4px 15px rgba(81, 175, 252, 0.5), 0 6px 20px rgba(255, 99, 132, 0.3);padding: 15px 25px;color: #333;font-size: 1.8em; width: fit-content; margin-left: auto; margin-right: auto;}
-        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 20px; text-align: center; transition: transform 0.3s ease; text-decoration: none; color: inherit; display: block; }
-        .card:hover { transform: translateY(-5px); }
-        .card h2 { font-size: 1.5em; margin-bottom: 10px; }
-        .card p { font-size: 1em; color: #666; }
-        .emoji { font-size: 2em; margin-bottom: 10px; display: block; transition: transform 0.3s ease; }
-        .card:hover .emoji { transform: scale(1.2); }
-        .strongest_count, .strongest_rate { border-top: 5px solid #2ecc71; }
-        .winning_count, .winning_rate { border-top: 5px solid #2ecc71; }
-        .strong_count, .strong_rate { border-top: 5px solid #3498db; }
-        .critical_count, .critical_rate { border-top: 5px solid #f1c40f; }
-        .competitive_count, .competitive_rate { border-top: 5px solid #e67e22; }
-        .weak_count, .weak_rate { border-top: 5px solid #e74c3c; }
-        .losing_count, .losing_rate { border-top: 5px solid #e74c3c; }
-        .very-weak_count, .very-weak_rate { border-top: 5px solid #95a5a6; }
-        @media (max-width: 600px) {
-            .card-container { grid-template-columns: 1fr; }
-            .card h2 { font-size: 1.2em; }
-            .card p { font-size: 0.9em; }
-            .emoji { font-size: 1.5em; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 10px;
+        display: block;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(81, 175, 252, 0.5), 0 6px 20px rgba(255, 99, 132, 0.3);
+        padding: 15px 25px;
+        color: #333;
+        font-size: 1.8em;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    gap: 20px;
+    background: linear-gradient(135deg, #f9f9f9, #eef2f6);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .stats-container {
+    flex: 1;
+    min-width: 300px;
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .stats-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
+
+  .stats-container h2 {
+    font-size: 1.6em;
+    margin-bottom: 20px;
+    color: #222;
+    border-bottom: 2px solid rgb(81, 175, 252);
+    padding-bottom: 5px;
+  }
+
+  .stats-container p {
+    font-size: 1.2em;
+    margin: 12px 0;
+    color: #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .stats-container p span.label {
+    font-weight: 400;
+    color: #777;
+  }
+
+  .stats-container p span.value {
+    font-weight: 700;
+    color: #333;
+  }
+
+  .charts-container {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .chart-wrapper {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .chart-wrapper:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
+
+  .chart-wrapper canvas {
+    max-width: 100%;
+    height: 300px;
+  }
+
+  @media (max-width: 768px) {
+    .dashboard {
+      flex-direction: column;
+      padding: 15px;
+    }
+    .stats-container, .charts-container {
+      flex: none;
+      width: 100%;
+    }
+    .chart-wrapper canvas {
+      height: 250px;
+    }
+  }
+    .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    }
+      .card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+      }
+      .card h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+      }
+      .card p {
+        font-size: 1em;
+        color: #666;
+      }
+      .emoji {
+        font-size: 2em;
+        margin-bottom: 10px;
+        display: block;
+        transition: transform 0.3s ease;
+      }
+      .card:hover .emoji {
+        transform: scale(1.2);
+      }
+      .strongest_count,
+      .strongest_rate {
+        border-top: 5px solid #2ecc71;
+      }
+      .winning_count,
+      .winning_rate {
+        border-top: 5px solid #2ecc71;
+      }
+      .strong_count,
+      .strong_rate {
+        border-top: 5px solid #3498db;
+      }
+      .critical_count,
+      .critical_rate {
+        border-top: 5px solid #f1c40f;
+      }
+      .competitive_count,
+      .competitive_rate {
+        border-top: 5px solid #e67e22;
+      }
+      .weak_count,
+      .weak_rate {
+        border-top: 5px solid #e74c3c;
+      }
+      .losing_count,
+      .losing_rate {
+        border-top: 5px solid #e74c3c;
+      }
+      .very-weak_count,
+      .very-weak_rate {
+        border-top: 5px solid #95a5a6;
+      }
+      @media (max-width: 600px) {
+        .card-container {
+          grid-template-columns: 1fr;
         }
+        .card h2 {
+          font-size: 1.2em;
+        }
+        .card p {
+          font-size: 0.9em;
+        }
+        .emoji {
+          font-size: 1.5em;
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <h1>Election Dashboard</h1>
+
+    <div class="dashboard">
+        <!-- Left Side: Statistics -->
+        <div class="stats-container">
+          <h2>Election Summary</h2>
+          <p><span class="label">Total Centers:</span> <span class="value">{{ total_centers }}</span></p>
+          <p><span class="label">Winning Centers:</span> <span class="value">{{ winning_centers }}</span></p>
+          <p><span class="label">Losing Centers:</span> <span class="value">{{ losing_centers }}</span></p>
+          <p><span class="label">Total Voters:</span> <span class="value">{{ total_voters }}</span></p>
+          <p><span class="label">Total Casted Votes:</span> <span class="value">{{ total_votes }}</span></p>
+          <p><span class="label">Our Votes:</span> <span class="value">{{ our_casted_votes }}</span></p>
+          <p><span class="label">Opponent Votes:</span> <span class="value">{{ opponent_casted_votes }}</span></p>
+        </div>
+    
+        <!-- Right Side: Pie Charts -->
+        <div class="charts-container">
+          <div class="chart-wrapper">
+            <canvas id="centersChart"></canvas>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="votesChart"></canvas>
+          </div>
+        </div>
+      </div>
+
     <h1>Vote Center Analysis by Percentage</h1>
     <div class="card-container">
-        {% for category in rate_categories %}
-            <a href="{% url category.url_name %}" class="card {{ category.url_name|cut:'_centers' }}">
-                {% if category.name == 'Winning Centers' %}
-                    <span class="emoji">🏆</span>
-                {% elif category.name == 'Losing Centers' %}
-                    <span class="emoji">📉</span>
-                {% elif category.name == 'Dominant Centers' %}
-                    <span class="emoji">👑</span>
-                {% elif category.name == 'Solid Centers' %}
-                    <span class="emoji">💪</span>
-                {% elif category.name == 'Critical Centers' %}
-                    <span class="emoji">⚠️</span>
-                {% elif category.name == 'Contested Centers' %}
-                    <span class="emoji">🤼</span>
-                {% elif category.name == 'Struggling Centers' %}
-                    <span class="emoji">🏋️</span>
-                {% elif category.name == 'Underperforming Centers' %}
-                    <span class="emoji">🚩</span>
-                {% endif %}
-                <h2>{{ category.name }}</h2>
-                <p>{{ category.range }}</p>
-                <p>{{ category.count }} Centers</p>
-            </a>
-        {% endfor %}
+      {% for category in rate_categories %}
+      <a
+        href="{% url category.url_name %}"
+        class="card {{ category.url_name|cut:'_centers' }}"
+      >
+        {% if category.name == 'Winning Centers' %}
+        <span class="emoji">🏆</span>
+        {% elif category.name == 'Losing Centers' %}
+        <span class="emoji">📉</span>
+        {% elif category.name == 'Dominant Centers' %}
+        <span class="emoji">👑</span>
+        {% elif category.name == 'Solid Centers' %}
+        <span class="emoji">💪</span>
+        {% elif category.name == 'Critical Centers' %}
+        <span class="emoji">⚠️</span>
+        {% elif category.name == 'Contested Centers' %}
+        <span class="emoji">🤼</span>
+        {% elif category.name == 'Struggling Centers' %}
+        <span class="emoji">🏋️</span>
+        {% elif category.name == 'Underperforming Centers' %}
+        <span class="emoji">🚩</span>
+        {% endif %}
+        <h2>{{ category.name }}</h2>
+        <p>{{ category.range }}</p>
+        <p>{{ category.count }} Centers</p>
+      </a>
+      {% endfor %}
     </div>
 
-    <h1 style="margin-top: 30px;">Vote Center Analysis by Vote Count</h1>
+    <h1 style="margin-top: 30px">Vote Center Analysis by Vote Count</h1>
     <div class="card-container">
-        {% for category in count_categories %}
-            <a href="{% url category.url_name %}" class="card {{ category.url_name|cut:'_centers' }}">
-                {% if category.name == 'Winning Centers' %}
-                    <span class="emoji">🏆</span>
-                {% elif category.name == 'Losing Centers' %}
-                    <span class="emoji">📉</span>
-                {% elif category.name == 'Dominant Centers' %}
-                    <span class="emoji">👑</span>
-                {% elif category.name == 'Solid Centers' %}
-                    <span class="emoji">💪</span>
-                {% elif category.name == 'Critical Centers' %}
-                    <span class="emoji">⚠️</span>
-                {% elif category.name == 'Contested Centers' %}
-                    <span class="emoji">🤼</span>
-                {% elif category.name == 'Struggling Centers' %}
-                    <span class="emoji">🏋️</span>
-                {% elif category.name == 'Underperforming Centers' %}
-                    <span class="emoji">🚩</span>
-                {% endif %}
-                <h2>{{ category.name }}</h2>
-                <p>{{ category.range }}</p>
-                <p>{{ category.count }} Centers</p>
-            </a>
-        {% endfor %}
+      {% for category in count_categories %}
+      <a
+        href="{% url category.url_name %}"
+        class="card {{ category.url_name|cut:'_centers' }}"
+      >
+        {% if category.name == 'Winning Centers' %}
+        <span class="emoji">🏆</span>
+        {% elif category.name == 'Losing Centers' %}
+        <span class="emoji">📉</span>
+        {% elif category.name == 'Dominant Centers' %}
+        <span class="emoji">👑</span>
+        {% elif category.name == 'Solid Centers' %}
+        <span class="emoji">💪</span>
+        {% elif category.name == 'Critical Centers' %}
+        <span class="emoji">⚠️</span>
+        {% elif category.name == 'Contested Centers' %}
+        <span class="emoji">🤼</span>
+        {% elif category.name == 'Struggling Centers' %}
+        <span class="emoji">🏋️</span>
+        {% elif category.name == 'Underperforming Centers' %}
+        <span class="emoji">🚩</span>
+        {% endif %}
+        <h2>{{ category.name }}</h2>
+        <p>{{ category.range }}</p>
+        <p>{{ category.count }} Centers</p>
+      </a>
+      {% endfor %}
     </div>
-</body>
+
+    <script>
+        // Data from Django view
+        const stats = {
+            total_centers: {{ total_centers|default:0 }},
+            winning_centers: {{ winning_centers|default:0 }},
+            losing_centers: {{ losing_centers|default:0 }},
+            total_voters: {{ total_voters|default:0 }},
+            total_votes: {{ total_votes|default:0 }},
+            our_casted_votes: {{ our_casted_votes|default:0 }},
+            opponent_casted_votes: {{ opponent_casted_votes|default:0 }},
+            total_legal_votes: {{ total_legal_votes|default:0 }},
+            total_cancelled_votes: {{ total_cancelled_votes|default:0 }}
+        };
+      
+        // Calculated values
+        const opponent_votes = stats.opponent_casted_votes;
+        const not_casted = stats.total_voters - stats.total_votes;
+        const other_votes = stats.total_votes - (stats.our_casted_votes + opponent_votes + stats.total_cancelled_votes);
+        const other_centers = stats.total_centers - (stats.winning_centers + stats.losing_centers);
+      
+        // Centers Pie Chart
+        const centersCtx = document.getElementById('centersChart').getContext('2d');
+        new Chart(centersCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Winning Centers', 'Losing Centers', 'Other Centers'],
+                datasets: [{
+                    data: [stats.winning_centers, stats.losing_centers, other_centers],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',  // Blue for Winning
+                        'rgba(255, 99, 132, 0.8)',  // Red for Losing
+                        'rgba(150, 150, 150, 0.8)'  // Grey for Other
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(150, 150, 150, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: {
+                        display: true,
+                        text: 'Center Distribution'
+                    }
+                }
+            }
+        });
+      
+        // Votes Pie Chart
+        const votesCtx = document.getElementById('votesChart').getContext('2d');
+        new Chart(votesCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Our Vote', 'Opponent Vote', 'Other', 'Not Casted', 'Cancelled Vote'],
+                datasets: [{
+                    data: [
+                        stats.our_casted_votes,
+                        opponent_votes,
+                        other_votes,
+                        not_casted,
+                        stats.total_cancelled_votes
+                    ],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',  // Blue for Our Vote
+                        'rgba(255, 99, 132, 0.8)',  // Red for Opponent
+                        'rgba(255, 206, 86, 0.8)',  // Yellow for Other
+                        'rgba(153, 102, 255, 0.8)', // Purple for Not Casted
+                        'rgba(255, 159, 64, 0.8)'   // Orange for Cancelled
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: {
+                        display: true,
+                        text: 'Vote Distribution'
+                    }
+                }
+            }
+        });
+      </script>
+  </body>
 </html>
