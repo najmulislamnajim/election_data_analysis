@@ -99,6 +99,66 @@
             margin-right: 5px;
         }
 
+        /* Table Styles */
+        .table-wrapper {
+            width: 80%;
+            margin: 20px auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            display: none; /* Initially hidden */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: rgb(81, 175, 252);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Total Row Style */
+        .total-row {
+            font-weight: bold;
+            background-color: #e0f7fa; /* Light cyan for distinction */
+        }
+
+        /* Toggle Button Style */
+        .toggle-table-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: rgb(81, 175, 252);
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-table-btn:hover {
+            background-color: #ccc;
+        }
+
         @media (max-width: 768px) {
             h1 { font-size: 1.5em; }
             .button-container { flex-direction: column; align-items: center; }
@@ -113,6 +173,30 @@
             .button-container button { font-size: 12px; padding: 6px 10px; }
             .center-count { font-size: 14px; }
             .chart-container { height: 250px; }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1440px) {
+            .chart-wrapper, .table-wrapper {
+                width: 90%;
+            }
+            th, td {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 1366px) {
+            .chart-wrapper, .table-wrapper {
+                width: 95%;
+            }
+            th, td {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+            .chart-container {
+                height: 500px;
+            }
         }
     </style>
 </head>
@@ -133,6 +217,30 @@
         <div class="chart-container">
             <canvas id="voteCountChart"></canvas>
         </div>
+    </div>
+
+    <!-- Toggle Table Button -->
+    <button class="toggle-table-btn" onclick="toggleTable()">Show Table</button>
+
+    <!-- Table for Detailed Data -->
+    <div class="table-wrapper" id="tableWrapper">
+        <table id="centersTable">
+            <thead>
+                <tr>
+                    <th>Serial No.</th>
+                    <th>Center Name</th>
+                    <th>Total Voter</th>
+                    <th>Total Legal Vote</th>
+                    <th>Our Vote</th>
+                    <th>Opponent Vote</th>
+                    <th>Vote Difference</th>
+                    <th>Vote Difference by Percentage</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Populated by JavaScript -->
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -257,6 +365,7 @@
         function showOurCenters() {
             currentData = data.our_centers;
             updateChartData(currentData);
+            updateTableData(currentData);
             document.getElementById('chartTitle').textContent = "Our {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
             adjustChartWidth(currentData.length);
@@ -266,6 +375,7 @@
         function showOpponentCenters() {
             currentData = data.opponent_centers;
             updateChartData(currentData);
+            updateTableData(currentData);
             document.getElementById('chartTitle').textContent = "Opponent {{ title }}";
             document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
             adjustChartWidth(currentData.length);
@@ -297,6 +407,77 @@
             voteCountChart.options.scales.y.title.font.size = fontSize + 2;
             voteCountChart.update();
         });
+
+         // Update table data with Serial No. and Total
+         function updateTableData(centerData) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            let totalVoters = 0;
+            let totalLegalVotes = 0;
+            let totalOurVotes = 0;
+            let totalOpponentVotes = 0;
+            let totalVoteDifference = 0;
+
+            centerData.forEach((center, index) => {
+                const ourVote = center['7'] || 0;
+                const opponentVote = center['2'] || 0;
+                const totalVoter = center.total_voter || 0;
+                const totalLegalVote = center.total_legal_vote || 0;
+                const voteDifference = ourVote - opponentVote;
+                const voteDifferencePercentage = totalLegalVote > 0 ? ((voteDifference / totalLegalVote) * 100).toFixed(2) : 0;
+
+                // Update totals
+                totalVoters += totalVoter;
+                totalLegalVotes += totalLegalVote;
+                totalOurVotes += ourVote;
+                totalOpponentVotes += opponentVote;
+                totalVoteDifference += voteDifference;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${center.center_name || 'Unknown'}</td>
+                    <td>${totalVoter}</td>
+                    <td>${totalLegalVote}</td>
+                    <td>${ourVote}</td>
+                    <td>${opponentVote}</td>
+                    <td>${voteDifference}</td>
+                    <td>${voteDifferencePercentage}%</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Add Total Row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            const totalDifferencePercentage = totalLegalVotes > 0 ? ((totalVoteDifference / totalLegalVotes) * 100).toFixed(2) : 0;
+            totalRow.innerHTML = `
+                <td>Total</td>
+                <td>-</td>
+                <td>${totalVoters}</td>
+                <td>${totalLegalVotes}</td>
+                <td>${totalOurVotes}</td>
+                <td>${totalOpponentVotes}</td>
+                <td>${totalVoteDifference}</td>
+                <td>${totalDifferencePercentage}%</td>
+            `;
+            tableBody.appendChild(totalRow);
+        }
+
+         // Toggle table visibility
+         function toggleTable() {
+            const tableWrapper = document.getElementById('tableWrapper');
+            const toggleBtn = document.querySelector('.toggle-table-btn');
+            if (tableWrapper.style.display === 'none' || tableWrapper.style.display === '') {
+                tableWrapper.style.display = 'block';
+                toggleBtn.textContent = 'Hide Table';
+            } else {
+                tableWrapper.style.display = 'none';
+                toggleBtn.textContent = 'Show Table';
+            }
+        }
+
     </script>
 </body>
 </html>
