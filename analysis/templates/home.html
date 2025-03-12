@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -93,11 +94,12 @@
     flex: 1;
     min-width: 300px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 20px;
   }
 
   .chart-wrapper {
+    min-width: 300px;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -112,6 +114,7 @@
   }
 
   .chart-wrapper canvas {
+    min-width: 300px;
     max-width: 100%;
     height: 300px;
   }
@@ -159,7 +162,7 @@
         color: #666;
       }
       .emoji {
-        font-size: 2em;
+        font-size: 3.5em;
         margin-bottom: 10px;
         display: block;
         transition: transform 0.3s ease;
@@ -219,22 +222,19 @@
     <h1>Election Dashboard</h1>
 
     <div class="dashboard">
-        <!-- Left Side: Statistics -->
-        <div class="stats-container">
-          <h2>Election Summary</h2>
-          <p><span class="label">Total Centers:</span> <span class="value">{{ total_centers }}</span></p>
-          <p><span class="label">Winning Centers:</span> <span class="value">{{ winning_centers }}</span></p>
-          <p><span class="label">Losing Centers:</span> <span class="value">{{ losing_centers }}</span></p>
-          <p><span class="label">Total Voters:</span> <span class="value">{{ total_voters }}</span></p>
-          <p><span class="label">Total Casted Votes:</span> <span class="value">{{ total_votes }}</span></p>
-          <p><span class="label">Our Votes:</span> <span class="value">{{ our_casted_votes }}</span></p>
-          <p><span class="label">Opponent Votes:</span> <span class="value">{{ opponent_casted_votes }}</span></p>
-        </div>
-    
-        <!-- Right Side: Pie Charts -->
         <div class="charts-container">
           <div class="chart-wrapper">
             <canvas id="centersChart"></canvas>
+          </div>
+          <div class="stats-container">
+            <h2>Election Summary</h2>
+            <p><span class="label">Total Centers:</span> <span class="value">{{ total_centers }}</span></p>
+            <p><span class="label">Winning Centers:</span> <span class="value">{{ winning_centers }}</span></p>
+            <p><span class="label">Losing Centers:</span> <span class="value">{{ losing_centers }}</span></p>
+            <p><span class="label">Total Voters:</span> <span class="value">{{ total_voters }}</span></p>
+            <p><span class="label">Total Casted Votes:</span> <span class="value">{{ total_votes }}</span></p>
+            <p><span class="label">Our Votes:</span> <span class="value">{{ our_casted_votes }}</span></p>
+            <p><span class="label">Opponent Votes:</span> <span class="value">{{ opponent_casted_votes }}</span></p>
           </div>
           <div class="chart-wrapper">
             <canvas id="votesChart"></canvas>
@@ -250,21 +250,21 @@
         class="card {{ category.url_name|cut:'_centers' }}"
       >
         {% if category.name == 'Winning Centers' %}
-        <span class="emoji">🏆</span>
+        <span class="emoji"> <img src="{% static 'images/increase.png' %}" alt="up"> </span>
         {% elif category.name == 'Losing Centers' %}
-        <span class="emoji">📉</span>
+        <span class="emoji"> <img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% elif category.name == 'Dominant Centers' %}
-        <span class="emoji">👑</span>
+        <span class="emoji"><img src="{% static 'images/increase.png' %}" alt="up"></span>
         {% elif category.name == 'Solid Centers' %}
-        <span class="emoji">💪</span>
+        <span class="emoji"><img src="{% static 'images/increase.png' %}" alt="up"></span>
         {% elif category.name == 'Critical Centers' %}
         <span class="emoji">⚠️</span>
         {% elif category.name == 'Contested Centers' %}
-        <span class="emoji">🤼</span>
+        <span class="emoji"><img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% elif category.name == 'Struggling Centers' %}
-        <span class="emoji">🏋️</span>
+        <span class="emoji"><img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% elif category.name == 'Underperforming Centers' %}
-        <span class="emoji">🚩</span>
+        <span class="emoji"><img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% endif %}
         <h2>{{ category.name }}</h2>
         <p>{{ category.range }}</p>
@@ -281,21 +281,21 @@
         class="card {{ category.url_name|cut:'_centers' }}"
       >
         {% if category.name == 'Winning Centers' %}
-        <span class="emoji">🏆</span>
+        <span class="emoji"><img src="{% static 'images/increase.png' %}" alt="up"></span>
         {% elif category.name == 'Losing Centers' %}
-        <span class="emoji">📉</span>
+        <span class="emoji"><img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% elif category.name == 'Dominant Centers' %}
-        <span class="emoji">👑</span>
+        <span class="emoji"><img src="{% static 'images/increase.png' %}" alt="up"></span>
         {% elif category.name == 'Solid Centers' %}
-        <span class="emoji">💪</span>
+        <span class="emoji"><img src="{% static 'images/increase.png' %}" alt="up"></span>
         {% elif category.name == 'Critical Centers' %}
         <span class="emoji">⚠️</span>
         {% elif category.name == 'Contested Centers' %}
-        <span class="emoji">🤼</span>
+        <span class="emoji"><img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% elif category.name == 'Struggling Centers' %}
-        <span class="emoji">🏋️</span>
+        <span class="emoji"><img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% elif category.name == 'Underperforming Centers' %}
-        <span class="emoji">🚩</span>
+        <span class="emoji"><img src="{% static 'images/down64.png' %}" alt="down"></span>
         {% endif %}
         <h2>{{ category.name }}</h2>
         <p>{{ category.range }}</p>
