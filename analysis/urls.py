@@ -20,4 +20,10 @@ urlpatterns = [
     path('centers/underperforming_count/', views.center_detail_count, name='very_weak_centers_count'),
     path('centers/winning_count/', views.center_detail_count, name='winning_centers_count'),
     path('centers/losing_count/', views.center_detail_count, name='losing_centers_count'),
+    
+    path('upazila', views.upazila_analysis_view, name='upazila_analysis'),
+    path('u-winning/<str:upazila_name>/', views.upazila_winning_details_rate, name='upazila_winning_details_rate'),
+    path('u-losing/<str:upazila_name>/', views.upazila_losing_details_rate, name='upazila_losing_details_rate'),
+    path('u-winning-count/<str:upazila_name>/', views.upazila_winning_details_count, name='upazila_winning_details_count'),
+    path('u-losing-count/<str:upazila_name>/', views.upazila_losing_details_count, name='upazila_losing_details_count'),
 ]
