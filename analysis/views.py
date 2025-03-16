@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from .utils import analyze_election_data
+from django.utils.text import slugify
+from .utils import analyze_election_data, upazila_analysis 
+import json
 
 def plot_vote_rates(request):
     data = analyze_election_data()
@@ -95,5 +97,81 @@ def center_detail_count(request):
         'our_centers': our_centers,
         'opponent_centers': opponent_centers,
         'centers': our_centers,  # For initial count
+    }
+    return render(request, 'center_details_count.html', context)
+
+
+def upazila_analysis_view(request):
+    data = upazila_analysis()
+    upazila_data = list(data.values())
+    for u in upazila_data:
+        u['total_center_count'] = int(u['total_center_count'])
+        u['winning_center_count'] = int(u['winning_center_count'])
+        u['losing_center_count'] = int(u['losing_center_count'])
+        u['winning_percentage'] = float(u['winning_percentage'])
+        u['losing_percentage'] = float(u['losing_percentage'])
+        u['total_voters'] = int(u['total_voters'])
+        u['total_votes'] = int(u['total_votes'])
+        u['our_casted_votes'] = int(u['our_casted_votes'])
+        u['opponent_casted_votes'] = int(u['opponent_casted_votes'])
+        u['total_cancelled_votes'] = int(u['total_cancelled_votes'])
+    
+    final_data = [upazila_data[1], upazila_data[0]]
+
+    context = {
+        'upazilas': final_data,
+        'upazilas_json': json.dumps(final_data)
+    }
+    return render(request, 'upazila.html', context)
+
+def upazila_winning_details_rate(request, upazila_name=None):
+    upazila_data = upazila_analysis()
+    data = upazila_data[upazila_name]
+    context = {
+        'title': f'Winning Center ({data["name"]})',
+        'category_name': 'Winning Centers',
+        'our_centers': data['winning_centers'],
+        'opponent_centers': data['opponent_winning_centers'],
+        'centers': data['winning_centers'],
+        'home_url':'upazila_analysis'
+    }
+    return render(request, 'center_detail.html', context)
+
+def upazila_losing_details_rate(request, upazila_name=None):
+    upazila_data = upazila_analysis()
+    data = upazila_data[upazila_name]
+    context = {
+        'title': f'Losing Center ({data["name"]})',
+        'category_name': 'Losing Centers',
+        'our_centers': data['losing_centers'],
+        'opponent_centers': data['opponent_losing_centers'],
+        'centers': data['losing_centers'],
+        'home_url':'upazila_analysis'
+    }
+    return render(request, 'center_detail.html', context)
+
+def upazila_winning_details_count(request, upazila_name=None):
+    upazila_data = upazila_analysis()
+    data = upazila_data[upazila_name]
+    context = {
+        'title': f'Winning Center ({data["name"]})',
+        'category_name': 'Winning Centers',
+        'our_centers': data['winning_centers'],
+        'opponent_centers': data['opponent_winning_centers'],
+        'centers': data['winning_centers'],
+        'home_url':'upazila_analysis'
+    }
+    return render(request, 'center_details_count.html', context)
+
+def upazila_losing_details_count(request, upazila_name=None):
+    upazila_data = upazila_analysis()
+    data = upazila_data[upazila_name]
+    context = {
+        'title': f'Losing Center ({data["name"]})',
+        'category_name': 'Losing Centers',
+        'our_centers': data['losing_centers'],
+        'opponent_centers': data['opponent_losing_centers'],
+        'centers': data['losing_centers'],
+        'home_url':'upazila_analysis'
     }
     return render(request, 'center_details_count.html', context)
