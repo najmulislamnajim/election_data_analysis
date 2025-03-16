@@ -1,0 +1,350 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upazila Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(81, 175, 252, 0.5), 0 6px 20px rgba(255, 99, 132, 0.3);
+            padding: 15px 25px;
+            color: #333;
+            font-size: 1.8em;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .upazila-section {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            background: linear-gradient(135deg, #f9f9f9, #eef2f6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .stats-container {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stats-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+        }
+        .stats-container h2 {
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            color: #222;
+            border-bottom: 2px solid rgb(81, 175, 252);
+            padding-bottom: 5px;
+        }
+        .stats-container p {
+            font-size: 1.2em;
+            margin: 12px 0;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stats-container p span.label { font-weight: 400; color: #777; }
+        .stats-container p span.value { font-weight: 700; color: #333; }
+        .charts-container {
+            flex: 2;
+            min-width: 300px;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+        .chart-wrapper {
+            flex: 1;
+            min-width: 250px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .chart-wrapper:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+        }
+        .chart-wrapper canvas {
+            max-width: 100%;
+            height: 300px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard { flex-direction: column; }
+            .charts-container { flex-direction: column; }
+            .stats-container, .charts-container { width: 100%; }
+            .chart-wrapper canvas, .bar-chart-container { height: 250px; }
+            th, td { font-size: 0.9em; padding: 8px 10px; }
+        }
+        .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    }
+      .card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+      }
+      .card h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+      }
+      .card p {
+        font-size: 1em;
+        color: #666;
+      }
+      .emoji {
+        font-size: 3.5em;
+        margin-bottom: 10px;
+        display: block;
+        transition: transform 0.3s ease;
+      }
+      .card:hover .emoji {
+        transform: scale(1.2);
+      }
+      .strongest {
+        border-top: 5px solid #2ecc71;
+      }
+      .button-33 {
+        background-color: #c2fbd7;
+        border-radius: 100px;
+        box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset,rgba(44, 187, 99, .15) 0 1px 2px,rgba(44, 187, 99, .15) 0 2px 4px,rgba(44, 187, 99, .15) 0 4px 8px,rgba(44, 187, 99, .15) 0 8px 16px,rgba(44, 187, 99, .15) 0 16px 32px;
+        color: green;
+        cursor: pointer;
+        display: inline-block;
+        font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;
+        padding: 7px 20px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 250ms;
+        border: 0;
+        font-size: 18px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        margin-bottom: 50px;
+        }
+      .button-34 {
+        background-color: #cc351e;
+        border-radius: 100px;
+        box-shadow: rgba(236, 95, 70, 0.2) 0 -25px 18px -14px inset,rgba(241, 49, 46, 0.15) 0 1px 2px,rgba(240, 80, 80, 0.15) 0 2px 4px,rgba(185, 69, 40, 0.15) 0 4px 8px,rgba(239, 34, 34, 0.15) 0 8px 16px,rgba(187, 49, 44, 0.15) 0 16px 32px;
+        color: white !important;
+        cursor: pointer;
+        display: inline-block;
+        font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;
+        padding: 7px 20px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 250ms;
+        border: 0;
+        font-size: 18px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        margin-bottom: 50px;
+        }
+
+        .button-33:hover {
+        box-shadow: rgba(44,187,99,.35) 0 -25px 18px -14px inset,rgba(44,187,99,.25) 0 1px 2px,rgba(44,187,99,.25) 0 2px 4px,rgba(44,187,99,.25) 0 4px 8px,rgba(44,187,99,.25) 0 8px 16px,rgba(44,187,99,.25) 0 16px 32px;
+        transform: scale(1.05) rotate(-1deg);
+    }
+        .button-34:hover {
+        box-shadow: rgba(165, 16, 16, 0.35) 0 -25px 18px -14px inset,rgba(187, 63, 44, 0.25) 0 1px 2px,rgba(208, 69, 35, 0.25) 0 2px 4px,rgba(247, 88, 52, 0.25) 0 4px 8px,rgba(246, 51, 51, 0.25) 0 8px 16px,rgba(233, 23, 23, 0.25) 0 16px 32px;
+        transform: scale(1.05) rotate(-1deg);
+    }
+    </style>
+</head>
+<body>
+    <h1>Upazila Dashboard</h1>
+
+    {% for upazila in upazilas %}
+    <div class="upazila-section" id="upazila-{{ forloop.counter }}">
+        <div class="dashboard">
+            <div class="charts-container">
+                <div class="stats-container">
+                    <h2>{{ upazila.name }}</h2>
+                    <p><span class="label">Total Centers:</span> <span class="value">{{ upazila.total_center_count }}</span></p>
+                    <p><span class="label">Winning Centers:</span> <span class="value">{{ upazila.winning_center_count }} ({{ upazila.winning_percentage|floatformat:2}}%)</span></p>
+                    <p><span class="label">Losing Centers:</span> <span class="value">{{ upazila.losing_center_count }} ({{ upazila.losing_percentage|floatformat:2}}%)</span></p>
+                    <p><span class="label">Total Voters:</span> <span class="value">{{ upazila.total_voters }}</span></p>
+                    <p><span class="label">Total Casted Votes:</span> <span class="value">{{ upazila.total_votes }}</span></p>
+                    <p><span class="label">Our Votes:</span> <span class="value">{{ upazila.our_casted_votes }}</span></p>
+                    <p><span class="label">Opponent Votes:</span> <span class="value">{{ upazila.opponent_casted_votes }}</span></p>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="centersChart-{{ forloop.counter }}"></canvas>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <canvas id="votesChart-{{ forloop.counter }}"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-container">
+        <!-- <div>
+            <a
+            href="#"
+            class="card strongest"
+            >
+            <span class="emoji"> <img src="{% static 'images/increase.png' %}" alt="up"> </span>
+            <h2>Winning Centers (by Percentage)</h2>
+            <p>{{ upazila.winning_center_count }} Centers</p>
+            </a>
+        </div> -->
+        <div>
+            <a href="{% url 'upazila_winning_details_rate' upazila_name=upazila.name|lower|slugify %}" style="text-decoration: none;">
+                <button class="button-33" role="button">Winning By Percentage</button>
+            </a>
+        </div>
+        <div>
+            <a href="{% url 'upazila_winning_details_count' upazila_name=upazila.name|lower|slugify %}" style="text-decoration: none;">
+                <button class="button-33" role="button">Winning By Vote Count</button>
+            </a>
+        </div>
+        <div>
+            <a href="{% url 'upazila_losing_details_rate' upazila_name=upazila.name|lower|slugify %}" style="text-decoration: none;">
+                <button class="button-34" role="button" >Losing By Percentage</button>
+            </a>
+        </div>
+        <div>
+            <a href="{% url 'upazila_losing_details_count' upazila_name=upazila.name|lower|slugify %}" style="text-decoration: none;">
+                <button class="button-34" role="button">Losing By Vote Count</button>
+            </a>
+        </div>
+        
+        
+        <!-- <div>
+            <a
+            href=""
+            class="card"
+            >
+            <span class="emoji"> <img src="{% static 'images/down64.png' %}" alt="up"> </span>
+            <h2>Losing Centers (by Percentage)</h2>
+            <p>{{ upazila.losing_center_count }} Centers</p>
+            </a>
+        </div> -->
+        
+    </div>
+    {% endfor %}
+
+    <script>
+        const upazilas = {{ upazilas_json|safe }};
+
+        upazilas.forEach((upazila, index) => {
+            const idx = index + 1;
+
+            // Centers Pie Chart
+            const centersCtx = document.getElementById(`centersChart-${idx}`).getContext('2d');
+            new Chart(centersCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Winning Centers', 'Losing Centers', 'Other Centers'],
+                    datasets: [{
+                        data: [
+                            upazila.winning_center_count,
+                            upazila.losing_center_count,
+                            upazila.total_center_count - (upazila.winning_center_count + upazila.losing_center_count)
+                        ],
+                        backgroundColor: ['rgba(54, 162, 235, 0.8)', 'rgba(255, 99, 132, 0.8)', 'rgba(150, 150, 150, 0.8)'],
+                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(150, 150, 150, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' }, title: { display: true, text: 'Center Distribution' } }
+                }
+            });
+
+            // Votes Pie Chart
+            const votesCtx = document.getElementById(`votesChart-${idx}`).getContext('2d');
+            const not_casted = upazila.total_voters - upazila.total_votes;
+            const other_votes = upazila.total_votes - (upazila.our_casted_votes + upazila.opponent_casted_votes + upazila.total_cancelled_votes);
+            new Chart(votesCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Our Vote', 'Opponent Vote', 'Other', 'Not Casted', 'Cancelled Vote'],
+                    datasets: [{
+                        data: [
+                            upazila.our_casted_votes,
+                            upazila.opponent_casted_votes,
+                            other_votes,
+                            not_casted,
+                            upazila.total_cancelled_votes
+                        ],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',  // Blue for Our Vote
+                            'rgba(255, 99, 132, 0.8)',  // Red for Opponent
+                            'rgba(255, 206, 86, 0.8)',  // Yellow for Other
+                            'rgba(153, 102, 255, 0.8)', // Purple for Not Casted
+                            'rgba(255, 159, 64, 0.8)'   // Orange for Cancelled
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' }, title: { display: true, text: 'Vote Distribution' } }
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
