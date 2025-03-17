@@ -26,4 +26,10 @@ urlpatterns = [
     path('u-losing/<str:upazila_name>/', views.upazila_losing_details_rate, name='upazila_losing_details_rate'),
     path('u-winning-count/<str:upazila_name>/', views.upazila_winning_details_count, name='upazila_winning_details_count'),
     path('u-losing-count/<str:upazila_name>/', views.upazila_losing_details_count, name='upazila_losing_details_count'),
+    
+    path('union', views.union_analysis_view, name='union_analysis'),
+    path('un-winning/<str:union_name>/', views.union_winning_details_rate, name='union_winning_detailnion'),
+    path('un-losing/<str:union_name>/', views.union_losing_details_rate, name='union_losing_details_rate'),
+    path('un-winning-count/<str:union_name>/', views.union_winning_details_count, name='union_winning_details_count'),
+    path('un-losing-count/<str:union_name>/', views.union_losing_details_count, name='union_losing_details_count'),
 ]
