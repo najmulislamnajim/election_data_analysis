@@ -223,9 +223,6 @@
 
     <div class="dashboard">
         <div class="charts-container">
-          <div class="chart-wrapper">
-            <canvas id="centersChart"></canvas>
-          </div>
           <div class="stats-container">
             <h2>Election Summary</h2>
             <p><span class="label">Total Centers:</span> <span class="value">{{ total_centers }}</span></p>
@@ -235,6 +232,9 @@
             <p><span class="label">Total Casted Votes:</span> <span class="value">{{ total_votes }}</span></p>
             <p><span class="label">Our Votes:</span> <span class="value">{{ our_casted_votes }}</span></p>
             <p><span class="label">Opponent Votes:</span> <span class="value">{{ opponent_casted_votes }}</span></p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="centersChart"></canvas>
           </div>
           <div class="chart-wrapper">
             <canvas id="votesChart"></canvas>
