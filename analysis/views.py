@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.utils.text import slugify
-from .utils import analyze_election_data, upazila_analysis 
+from .utils import analyze_election_data, upazila_analysis, union_analysis, union_analysis_2
 import json
 
 def plot_vote_rates(request):
@@ -69,7 +69,9 @@ def center_detail(request):
         'category_name': category_name,
         'our_centers': our_centers,
         'opponent_centers': opponent_centers,
-        'centers': our_centers,  # For initial count
+        'centers': our_centers,
+        'home_url': 'home',
+        'home_url_text': 'Back to Home',
     }
     return render(request, 'center_detail.html', context)
 
@@ -96,7 +98,9 @@ def center_detail_count(request):
         'category_name': category_name,
         'our_centers': our_centers,
         'opponent_centers': opponent_centers,
-        'centers': our_centers,  # For initial count
+        'centers': our_centers,
+        'home_url': 'home',
+        'home_url_text': 'Back to Home',
     }
     return render(request, 'center_details_count.html', context)
 
@@ -133,7 +137,8 @@ def upazila_winning_details_rate(request, upazila_name=None):
         'our_centers': data['winning_centers'],
         'opponent_centers': data['opponent_winning_centers'],
         'centers': data['winning_centers'],
-        'home_url':'upazila_analysis'
+        'home_url':'upazila_analysis',
+        'home_url_text': 'Back to Upazila Analysis'
     }
     return render(request, 'center_detail.html', context)
 
@@ -146,7 +151,8 @@ def upazila_losing_details_rate(request, upazila_name=None):
         'our_centers': data['losing_centers'],
         'opponent_centers': data['opponent_losing_centers'],
         'centers': data['losing_centers'],
-        'home_url':'upazila_analysis'
+        'home_url':'upazila_analysis',
+        'home_url_text': 'Back to Upazila Analysis'
     }
     return render(request, 'center_detail.html', context)
 
@@ -159,7 +165,8 @@ def upazila_winning_details_count(request, upazila_name=None):
         'our_centers': data['winning_centers'],
         'opponent_centers': data['opponent_winning_centers'],
         'centers': data['winning_centers'],
-        'home_url':'upazila_analysis'
+        'home_url':'upazila_analysis',
+        'home_url_text': 'Back to Upazila Analysis'
     }
     return render(request, 'center_details_count.html', context)
 
@@ -172,6 +179,110 @@ def upazila_losing_details_count(request, upazila_name=None):
         'our_centers': data['losing_centers'],
         'opponent_centers': data['opponent_losing_centers'],
         'centers': data['losing_centers'],
-        'home_url':'upazila_analysis'
+        'home_url':'upazila_analysis',
+        'home_url_text': 'Back to Upazila Analysis'
+    }
+    return render(request, 'center_details_count.html', context)
+
+
+# def union_analysis_view(request):
+#     data = union_analysis()
+#     union_data = list(data.values())
+#     for u in union_data:
+#         u['total_center_count'] = int(u['total_center_count'])
+#         u['winning_center_count'] = int(u['winning_center_count'])
+#         u['losing_center_count'] = int(u['losing_center_count'])
+#         u['winning_percentage'] = float(u['winning_percentage'])
+#         u['losing_percentage'] = float(u['losing_percentage'])
+#         u['total_voters'] = int(u['total_voters'])
+#         u['total_votes'] = int(u['total_votes'])
+#         u['our_casted_votes'] = int(u['our_casted_votes'])
+#         u['opponent_casted_votes'] = int(u['opponent_casted_votes'])
+#         u['total_cancelled_votes'] = int(u['total_cancelled_votes'])
+    
+#     final_data = union_data
+
+#     context = {
+#         'upazilas': final_data,
+#         'upazilas_json': json.dumps(final_data)
+#     }
+#     return render(request, 'union_test.html', context)
+
+def union_analysis_view(request):
+    data = union_analysis_2()
+    upazila_data = list(data.values())
+    
+    for upazila in upazila_data:
+        for union in upazila['unions'].values():
+            union['total_center_count'] = int(union['total_center_count'])
+            union['winning_center_count'] = int(union['winning_center_count'])
+            union['losing_center_count'] = int(union['losing_center_count'])
+            union['winning_percentage'] = float(union['winning_percentage'])
+            union['losing_percentage'] = float(union['losing_percentage'])
+            union['total_voters'] = int(union['total_voters'])
+            union['total_votes'] = int(union['total_votes'])
+            union['our_casted_votes'] = int(union['our_casted_votes'])
+            union['opponent_casted_votes'] = int(union['opponent_casted_votes'])
+            union['total_cancelled_votes'] = int(union['total_cancelled_votes'])
+    
+    context = {
+        'upazilas': upazila_data,
+        'upazilas_json': json.dumps(upazila_data)
+    }
+    return render(request, 'union.html', context)
+
+def union_winning_details_rate(request, upazila_name=None):
+    union_data = union_analysis()
+    data = union_data[upazila_name]
+    context = {
+        'title': f'Winning Center ({data["name"]})',
+        'category_name': 'Winning Centers',
+        'our_centers': data['winning_centers'],
+        'opponent_centers': data['opponent_winning_centers'],
+        'centers': data['winning_centers'],
+        'home_url':'union_analysis',
+        'home_url_text': 'Back to Union Analysis'
+    }
+    return render(request, 'center_detail.html', context)
+
+def union_losing_details_rate(request, union_name=None):
+    union_data = union_analysis()
+    data = union_data[union_name]
+    context = {
+        'title': f'Losing Center ({data["name"]})',
+        'category_name': 'Losing Centers',
+        'our_centers': data['losing_centers'],
+        'opponent_centers': data['opponent_losing_centers'],
+        'centers': data['losing_centers'],
+        'home_url':'union_analysis',
+        'home_url_text': 'Back to Union Analysis'
+    }
+    return render(request, 'center_detail.html', context)
+
+def union_winning_details_count(request, union_name=None):
+    union_data = union_analysis()
+    data = union_data[union_name]
+    context = {
+        'title': f'Winning Center ({data["name"]})',
+        'category_name': 'Winning Centers',
+        'our_centers': data['winning_centers'],
+        'opponent_centers': data['opponent_winning_centers'],
+        'centers': data['winning_centers'],
+        'home_url':'union_analysis',
+        'home_url_text': 'Back to Union Analysis'
+    }
+    return render(request, 'center_details_count.html', context)
+
+def union_losing_details_count(request, union_name=None):
+    union_data = union_analysis()
+    data = union_data[union_name]
+    context = {
+        'title': f'Losing Center ({data["name"]})',
+        'category_name': 'Losing Centers',
+        'our_centers': data['losing_centers'],
+        'opponent_centers': data['opponent_losing_centers'],
+        'centers': data['losing_centers'],
+        'home_url':'union_analysis',
+        'home_url_text': 'Back to Union Analysis'
     }
     return render(request, 'center_details_count.html', context)
