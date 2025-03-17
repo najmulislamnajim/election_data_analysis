@@ -145,3 +145,116 @@ def upazila_analysis():
         }
         upazila[key] = data
     return upazila
+
+def union_analysis():
+    election_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/election_data.csv'))
+    center_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/center_details.csv'))
+    df = election_data.merge(center_data, on='id')
+    
+    # Calculate vote percentages
+    df['our_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['7'] / df['total_legal_vote']) * 100, 0)
+    df['opponent_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['2'] / df['total_legal_vote']) * 100, 0)
+    df['our_vote_rate'] = df['our_vote_rate'].round(2)
+    df['opponent_vote_rate'] = df['opponent_vote_rate'].round(2)
+    
+    union_group = df.groupby('union')
+    union = dict()
+    for name, entries in union_group:
+        total_centers = len(entries)
+        winning_centers= entries[entries['7'] > entries['2']].reset_index(drop=True)
+        losing_centers = entries[entries['7'] < entries['2']].reset_index(drop=True)
+        opponent_winning_centers= entries[entries['7'] < entries['2']].reset_index(drop=True)
+        opponent_losing_centers = entries[entries['7'] > entries['2']].reset_index(drop=True)
+        winning_count = len(winning_centers)
+        losing_count = len(losing_centers)
+        winning_percentage = (len(winning_centers) / total_centers) * 100
+        losing_percentage = (len(losing_centers) / total_centers) * 100
+        total_voters = entries['total_voter'].sum()
+        total_votes = entries['total_legal_vote'].sum()
+        our_votes = entries['7'].sum()
+        opponent_votes = entries['2'].sum()
+        cancelled_votes = entries['total_cancelled_vote'].sum()
+        key = slugify(name.lower())
+        data = {
+            'name': name,
+            'total_centers' : entries.to_dict(orient='records'),
+            'winning_centers': winning_centers.to_dict(orient='records'),
+            'losing_centers': losing_centers.to_dict(orient='records'),
+            'opponent_winning_centers': opponent_winning_centers.to_dict(orient='records'),
+            'opponent_losing_centers': opponent_losing_centers.to_dict(orient='records'),
+            'total_center_count': total_centers,
+            'winning_center_count': winning_count,
+            'losing_center_count': losing_count,
+            'winning_percentage': winning_percentage,
+            'losing_percentage': losing_percentage,
+            'total_voters': total_voters,
+            'total_votes': total_votes,
+            'our_casted_votes': our_votes,
+            'opponent_casted_votes': opponent_votes,
+            'total_cancelled_votes': cancelled_votes,
+        }
+        union[key] = data
+    return union
+
+
+def union_analysis_2():
+    election_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/election_data.csv'))
+    center_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/center_details.csv'))
+    df = election_data.merge(center_data, on='id')
+    
+    # Calculate vote percentages
+    df['our_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['7'] / df['total_legal_vote']) * 100, 0)
+    df['opponent_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['2'] / df['total_legal_vote']) * 100, 0)
+    df['our_vote_rate'] = df['our_vote_rate'].round(2)
+    df['opponent_vote_rate'] = df['opponent_vote_rate'].round(2)
+    
+    # Group by upazila first, then by union
+    upazila_group = df.groupby('upazila')
+    upazila_data = dict()
+    
+    for upazila_name, upazila_entries in upazila_group:
+        union_group = upazila_entries.groupby('union')
+        unions = dict()
+        
+        for union_name, entries in union_group:
+            total_centers = len(entries)
+            winning_centers = entries[entries['7'] > entries['2']].reset_index(drop=True)
+            losing_centers = entries[entries['7'] < entries['2']].reset_index(drop=True)
+            opponent_winning_centers = losing_centers
+            opponent_losing_centers = winning_centers
+            winning_count = len(winning_centers)
+            losing_count = len(losing_centers)
+            winning_percentage = (winning_count / total_centers) * 100 if total_centers > 0 else 0
+            losing_percentage = (losing_count / total_centers) * 100 if total_centers > 0 else 0
+            total_voters = entries['total_voter'].sum()
+            total_votes = entries['total_legal_vote'].sum()
+            our_votes = entries['7'].sum()
+            opponent_votes = entries['2'].sum()
+            cancelled_votes = entries['total_cancelled_vote'].sum()
+            key = slugify(union_name.lower())
+            data = {
+                'name': union_name,
+                'total_centers': entries.to_dict(orient='records'),
+                'winning_centers': winning_centers.to_dict(orient='records'),
+                'losing_centers': losing_centers.to_dict(orient='records'),
+                'opponent_winning_centers': opponent_winning_centers.to_dict(orient='records'),
+                'opponent_losing_centers': opponent_losing_centers.to_dict(orient='records'),
+                'total_center_count': total_centers,
+                'winning_center_count': winning_count,
+                'losing_center_count': losing_count,
+                'winning_percentage': winning_percentage,
+                'losing_percentage': losing_percentage,
+                'total_voters': total_voters,
+                'total_votes': total_votes,
+                'our_casted_votes': our_votes,
+                'opponent_casted_votes': opponent_votes,
+                'total_cancelled_votes': cancelled_votes,
+            }
+            unions[key] = data
+        
+        upazila_data[slugify(upazila_name.lower())] = {
+            'name': upazila_name,
+            'unions': unions
+        }
+    
+    return upazila_data
