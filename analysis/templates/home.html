@@ -304,6 +304,27 @@
       {% endfor %}
     </div>
 
+    <h1 style="margin-top: 30px">Geographical Analysis</h1>
+    <div class="card-container" style="margin-bottom: 50px;">
+      <a
+        href="{% url 'upazila_analysis' %}"
+        class="card"
+      >
+        <span class="emoji">🏡</span>
+        
+        <h2>Upazila Analysis</h2>
+      </a>
+      <a
+        href="{% url 'union_analysis' %}"
+        class="card"
+      >
+        <span class="emoji">🏡</span>
+        
+        <h2>Union Analysis</h2>
+      </a>
+      
+    </div>
+
     <script>
         // Data from Django view
         const stats = {
