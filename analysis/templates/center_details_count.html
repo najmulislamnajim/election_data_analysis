@@ -194,7 +194,7 @@
         color: green;
         font-weight: bold;
       }
-      .status-loss {
+      .status-lose {
         color: red;
         font-weight: bold;
       }
@@ -605,7 +605,7 @@
                   <td>${voteDifferencePercentage}%</td>
               `;
               if (all) {
-                  let statusClass = status === "Win" ? "status-win" : (status === "Loss" ? "status-loss" : "status-tie");
+                  let statusClass = status === "Win" ? "status-win" : (status === "Lose" ? "status-lose" : "status-tie");
                   row.innerHTML += `<td class="${statusClass}">${status}</td>`;
               }
 
