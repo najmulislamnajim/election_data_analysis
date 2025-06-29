@@ -341,7 +341,7 @@
             // Votes Pie Chart
             const votesCtx = document.getElementById(`votesChart-${idx}`).getContext('2d');
             const not_casted = upazila.total_voters - upazila.total_votes;
-            const other_votes = upazila.total_votes - (upazila.our_casted_votes + upazila.opponent_casted_votes + upazila.total_cancelled_votes);
+            const other_votes = upazila.total_votes - (upazila.our_casted_votes + upazila.opponent_casted_votes);
             new Chart(votesCtx, {
                 type: 'pie',
                 data: {
