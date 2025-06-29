@@ -190,6 +190,9 @@
         color: gray;
         font-weight: bold;
       }
+      .hide-column{
+        display: none !important;
+      }
 
       @media (max-width: 768px) {
         h1 {
@@ -330,6 +333,7 @@
                 ><span class="up">↑</span><span class="down">↓</span></span
               >
             </th>
+            <th id="winStatus" class="hide-column">Status</th>
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -469,8 +473,9 @@
           document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
           adjustChartWidth(currentData.length);
           resetSortStates();
-          document.getElementById('tableHeader').appendChild(document.createElement('th')).textContent = "Status";
+          resetBtn();
           document.getElementById("allBtn").classList.add('selected-button');
+          document.getElementById("winStatus").classList.remove("hide-column");
       }
 
       function showOurCenters() {
@@ -481,7 +486,9 @@
           document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
           adjustChartWidth(currentData.length);
           resetSortStates();
+          resetBtn();
           document.getElementById("ourBtn").classList.add('selected-button');
+          document.getElementById("winStatus").classList.add("hide-column");
       }
 
       function showOpponentCenters() {
@@ -492,7 +499,9 @@
           document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
           adjustChartWidth(currentData.length);
           resetSortStates();
+          resetBtn();
           document.getElementById("opponentBtn").classList.add('selected-button');
+          document.getElementById("winStatus").classList.add("hide-column");
       }
 
       function updateChartData(centerData) {
@@ -605,8 +614,11 @@
               <td>${totalOpponentVotes}</td>
               <td>${totalVoteDifference}</td>
               <td>${totalDifferencePercentage}%</td>
-              <td>${winCount} Win, ${lossCount} Loss, ${tieCount} Tie</td>
           `;
+          if (all) {
+              let statusClass = winCount > lossCount ? "status-win" : (winCount < lossCount ? "status-loss" : "status-tie");
+              totalRow.innerHTML += `<td class="${statusClass}">${winCount > lossCount ? "Win" : (winCount < lossCount ? "Loss" : "Tie")}</td>`;
+          }
           tableBody.appendChild(totalRow);
       }
 
@@ -683,6 +695,29 @@
           document.getElementById("ourBtn").classList.remove('selected-button');
           document.getElementById("opponentBtn").classList.remove('selected-button');
       }
+
+      function exportTableToCSV(filename = 'table_data.csv') {
+        const rows = document.querySelectorAll('#tableBody tr');
+        const header = ['#', 'Center Name', 'Total Voter', 'Total Legal Vote', 'Our Vote', 'Our Vote %', 'Opponent Vote', 'Vote Diff', 'Diff %', 'Status'];
+        let csv = header.join(',') + '\n';
+
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            let rowData = [];
+            cols.forEach(col => {
+                rowData.push(col.innerText.trim());
+            });
+            csv += rowData.join(',') + '\n';
+        });
+
+        // Download
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
 
       window.addEventListener('resize', () => {
           const fontSize = getFontSize();
