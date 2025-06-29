@@ -25,6 +25,17 @@
         font-size: 1.8em;
       }
 
+      .btn{
+        background-color: rgb(81, 175, 252);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-right: 10px;
+      }
+
       .button-container {
         text-align: center;
         margin-bottom: 20px;
@@ -619,6 +630,15 @@
               totalRow.innerHTML += `<td>${winCount} Win, ${lossCount} Loss, ${tieCount} Tie</td>`;
           }
           tableBody.appendChild(totalRow);
+          const downloadBtn = document.createElement('tr');
+          downloadBtn.innerHTML = `
+          <td colspan="9">
+            <button class="btn" onclick="exportTableToCSV()">Download</button>
+            </td>
+            `;
+            if (all){
+                tableBody.appendChild(downloadBtn);
+            }
       }
 
       function resetSortStates() {
@@ -696,26 +716,41 @@
       }
 
       function exportTableToCSV(filename = 'table_data.csv') {
-        const rows = document.querySelectorAll('#tableBody tr');
-        const header = ['#', 'Center Name', 'Total Voter', 'Total Legal Vote', 'Our Vote', 'Our Vote %', 'Opponent Vote', 'Vote Diff', 'Diff %', 'Status'];
-        let csv = header.join(',') + '\n';
+    const rows = document.querySelectorAll('#tableBody tr');
 
-        rows.forEach(row => {
-            const cols = row.querySelectorAll('td');
-            let rowData = [];
-            cols.forEach(col => {
-                rowData.push(col.innerText.trim());
-            });
-            csv += rowData.join(',') + '\n';
+    // Dynamically determine if "Status" column exists
+    const firstRowCols = rows[0]?.querySelectorAll('td').length || 9;
+    const baseHeader = ['#', 'Center Name', 'Total Voter', 'Total Legal Vote', 'Our Vote', 'Our Vote %', 'Opponent Vote', 'Vote Diff', 'Diff %'];
+    const fullHeader = [...baseHeader, 'Status'];
+    const header = firstRowCols === 10 ? fullHeader : baseHeader;
+
+    let csv = header.join(',') + '\n';
+
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        let rowData = [];
+        cols.forEach(col => {
+            let text = col.innerText.trim();
+
+            // Quote text containing Bengali or commas
+            if (/[^\x00-\x7F]/.test(text) || text.includes(',')) {
+                text = `"${text}"`;
+            }
+
+            rowData.push(text);
         });
+        csv += rowData.join(',') + '\n';
+    });
 
-        // Download
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-    }
+    // Add UTF-8 BOM for Excel to properly display Bengali characters
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+}
+
 
 
       window.addEventListener('resize', () => {
