@@ -616,8 +616,7 @@
               <td>${totalDifferencePercentage}%</td>
           `;
           if (all) {
-              let statusClass = winCount > lossCount ? "status-win" : (winCount < lossCount ? "status-loss" : "status-tie");
-              totalRow.innerHTML += `<td class="${statusClass}">${winCount > lossCount ? "Win" : (winCount < lossCount ? "Loss" : "Tie")}</td>`;
+              totalRow.innerHTML += `<td>${winCount} Win, ${lossCount} Loss, ${tieCount} Tie</td>`;
           }
           tableBody.appendChild(totalRow);
       }
