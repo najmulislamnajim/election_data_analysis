@@ -316,7 +316,7 @@
               >
             </th>
             <th onclick="sortTable('total_legal_vote')">
-              Total Legal Vote<span class="sort-arrows"
+              Total Casted Vote<span class="sort-arrows"
                 ><span class="up">↑</span><span class="down">↓</span></span
               >
             </th>
@@ -332,6 +332,11 @@
             </th>
             <th onclick="sortTable('opponent_vote')">
               Opponent Vote<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+            <th onclick="sortTable('opponent_vote_percentage')">
+              Opponent Vote in %<span class="sort-arrows"
                 ><span class="up">↑</span><span class="down">↓</span></span
               >
             </th>
@@ -572,6 +577,7 @@
               const voteDifference = ourVote - opponentVote;
               const voteDifferencePercentage = totalLegalVote > 0 ? ((voteDifference / totalLegalVote) * 100).toFixed(2) : 0;
               const ourVotePercentage = totalLegalVote > 0 ? ((ourVote / totalLegalVote) * 100).toFixed(2) : 0;
+              const opponentVotePercentage = totalLegalVote > 0 ? ((opponentVote / totalLegalVote) * 100).toFixed(2) : 0;
               let status="Win";
               if(voteDifference<0){
                   status="Lose";
@@ -601,6 +607,7 @@
                   <td>${ourVote}</td>
                   <td>${ourVotePercentage}%</td>
                   <td>${opponentVote}</td>
+                  <td>${opponentVotePercentage}%</td>
                   <td>${voteDifference}</td>
                   <td>${voteDifferencePercentage}%</td>
               `;
@@ -616,6 +623,7 @@
           totalRow.className = 'total-row';
           const totalDifferencePercentage = totalLegalVotes > 0 ? ((totalVoteDifference / totalLegalVotes) * 100).toFixed(2) : 0;
           const totalOurVotePercentage = totalLegalVotes > 0 ? ((totalOurVotes / totalLegalVotes) * 100).toFixed(2) : 0;
+          const totalOpponentVotePercentage = totalLegalVotes > 0 ? ((totalOpponentVotes / totalLegalVotes) * 100).toFixed(2) : 0;
           totalRow.innerHTML = `
               <td>Total</td>
               <td>${totalCenter}</td>
@@ -624,6 +632,7 @@
               <td>${totalOurVotes}</td>
               <td>${totalOurVotePercentage}%</td>
               <td>${totalOpponentVotes}</td>
+              <td>${totalOpponentVotePercentage}%</td>
               <td>${totalVoteDifference}</td>
               <td>${totalDifferencePercentage}%</td>
           `;
@@ -652,6 +661,13 @@
       }
 
       function sortTable(column) {
+
+         const status = document.getElementById('winStatus');
+         let all = 1;
+         if (status.classList.contains('hide-column')){
+          all = 0;
+         }
+
           let direction = sortStates[column];
           if (direction === null || direction === 'desc') {
               direction = 'asc';
@@ -695,11 +711,15 @@
                     case 'ourh_vote_percentage':
                         aValue = a.total_legal_vote > 0 ? ((a['7'] || 0) / a.total_legal_vote * 100) : 0;
                         bValue = b.total_legal_vote > 0 ? ((b['7'] || 0) / b.total_legal_vote * 100) : 0;
+                      break;
+                    case 'opponent_vote_percentage':
+                      aValue = a.total_legal_vote > 0 ? ((a['2'] || 0) / a.total_legal_vote * 100) : 0;
+                      bValue = b.total_legal_vote > 0 ? ((b['2'] || 0) / b.total_legal_vote * 100) : 0;
               }
               return direction === 'asc' ? aValue - bValue : bValue - aValue;
           });
 
-          updateTableData(sortedData);
+          updateTableData(sortedData, all);
 
           document.querySelectorAll('.sort-arrows span').forEach(arrow => {
               arrow.classList.remove('active');
@@ -721,7 +741,7 @@
 
     // Dynamically determine if "Status" column exists
     const firstRowCols = rows[0]?.querySelectorAll('td').length || 9;
-    const baseHeader = ['#', 'Center Name', 'Total Voter', 'Total Legal Vote', 'Our Vote', 'Our Vote %', 'Opponent Vote', 'Vote Diff', 'Diff %'];
+    const baseHeader = ['#', 'Center Name', 'Total Voter', 'Total Casted Vote', 'Our Vote', 'Our Vote %', 'Opponent Vote', 'Opponent Vote %', 'Vote Diff', 'Diff %', 'Status'];
     const fullHeader = [...baseHeader, 'Status'];
     const header = firstRowCols === 10 ? fullHeader : baseHeader;
 
