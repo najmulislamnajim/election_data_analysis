@@ -269,7 +269,8 @@ def union_winning_details_count(request, union_name=None):
         'opponent_centers': data['opponent_winning_centers'],
         'centers': data['winning_centers'],
         'home_url':'union_analysis',
-        'home_url_text': 'Back to Union Analysis'
+        'home_url_text': 'Back to Union Analysis',
+        'union_name': union_name
     }
     return render(request, 'center_details_count.html', context)
 
