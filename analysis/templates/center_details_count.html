@@ -1,599 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ title }}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+      }
 
+      h1 {
+        text-align: center;
+        margin-top: 20px;
+        color: #333;
+        font-size: 1.8em;
+      }
+
+      .button-container {
+        text-align: center;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .button-container button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        background-color: #ccc;
+        color: black;
+      }
+
+      .button-container button:hover {
+        background-color: rgb(81, 175, 252);
+      }
+
+      .selected-button {
+        background-color: rgb(81, 175, 252) !important;
+      }
+
+      .button-container button:focus {
+        outline: none;
+      }
+
+      .button-container a {
+        color: white;
+        text-decoration: none;
+      }
+
+      .center-count {
+        text-align: center;
+        font-size: 18px;
+        margin-top: 10px;
+        color: #666;
+      }
+
+      .chart-wrapper {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .chart-container {
+        height: 600px;
+        width: calc(50px * {{centers|length}} + 100px);
+        min-width: 100%;
+        position: relative;
+      }
+
+      .chartjs-tooltip {
+        opacity: 1;
+        position: absolute;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border-radius: 3px;
+        padding: 8px;
+        pointer-events: none;
+        font-size: 14px;
+      }
+
+      .chartjs-tooltip-key {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+      }
+
+      /* Table Styles */
+      .table-wrapper {
+        width: 80%;
+        margin: 20px auto;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        display: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: rgb(81, 175, 252);
+        color: white;
+        font-weight: bold;
+        cursor: pointer; /* Indicates clickable */
+      }
+
+      th .sort-arrows {
+        display: inline-block;
+        margin-left: 5px;
+      }
+
+      th .sort-arrows span {
+        font-size: 20px;
+        opacity: 0.5; /* Inactive state */
+        transition: opacity 0.3s;
+      }
+
+      th .sort-arrows .active {
+        opacity: 1; /* Active state */
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      .total-row {
+        font-weight: bold;
+        background-color: #e0f7fa;
+      }
+
+      .toggle-table-btn {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: rgb(81, 175, 252);
+        color: white;
+        transition: background-color 0.3s;
+      }
+
+      .toggle-table-btn:hover {
+        background-color: #ccc;
+      }
+      .status-win {
+        color: green;
+        font-weight: bold;
+      }
+      .status-loss {
+        color: red;
+        font-weight: bold;
+      }
+      .status-tie {
+        color: gray;
+        font-weight: bold;
+      }
+
+      @media (max-width: 768px) {
         h1 {
-            text-align: center;
-            margin-top: 20px;
-            color: #333;
-            font-size: 1.8em;
+          font-size: 1.5em;
         }
-
         .button-container {
-            text-align: center;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
+          flex-direction: column;
+          align-items: center;
         }
-
         .button-container button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-            background-color: rgb(81, 175, 252);
-            color: white;
+          width: 80%;
+          max-width: 300px;
+          font-size: 14px;
+          padding: 8px 15px;
         }
-
-        .button-container button:hover {
-            background-color: #ccc;
-        }
-
-        .button-container button:focus {
-            outline: none;
-        }
-
-        .button-container a {
-            color: white;
-            text-decoration: none;
-        }
-
         .center-count {
-            text-align: center;
-            font-size: 18px;
-            margin-top: 10px;
-            color: #666;
+          font-size: 16px;
         }
-
-        .chart-wrapper {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 10px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
         .chart-container {
-            height: 600px;
-            width: calc(50px * {{ centers|length }} + 100px);
-            min-width: 100%;
-            position: relative;
+          height: 300px;
         }
-
         .chartjs-tooltip {
-            opacity: 1;
-            position: absolute;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border-radius: 3px;
-            padding: 8px;
-            pointer-events: none;
-            font-size: 14px;
+          font-size: 12px;
+          padding: 6px;
         }
+      }
 
-        .chartjs-tooltip-key {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            margin-right: 5px;
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 1.2em;
         }
+        .button-container button {
+          font-size: 12px;
+          padding: 6px 10px;
+        }
+        .center-count {
+          font-size: 14px;
+        }
+        .chart-container {
+          height: 250px;
+        }
+      }
 
-        /* Table Styles */
+      @media (max-width: 1440px) {
+        .chart-wrapper,
         .table-wrapper {
-            width: 80%;
-            margin: 20px auto;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            display: none;
+          width: 90%;
         }
+        th,
+        td {
+          padding: 10px 12px;
+          font-size: 14px;
+        }
+      }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      @media (max-width: 1366px) {
+        .chart-wrapper,
+        .table-wrapper {
+          width: 95%;
         }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
+        th,
+        td {
+          padding: 8px 10px;
+          font-size: 12px;
         }
-
-        th {
-            background-color: rgb(81, 175, 252);
-            color: white;
-            font-weight: bold;
-            cursor: pointer; /* Indicates clickable */
+        .chart-container {
+          height: 500px;
         }
-
-        th .sort-arrows {
-            display: inline-block;
-            margin-left: 5px;
-        }
-
-        th .sort-arrows span {
-            font-size: 20px;
-            opacity: 0.5; /* Inactive state */
-            transition: opacity 0.3s;
-        }
-
-        th .sort-arrows .active {
-            opacity: 1; /* Active state */
-            font-weight: bold;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .total-row {
-            font-weight: bold;
-            background-color: #e0f7fa;
-        }
-
-        .toggle-table-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: rgb(81, 175, 252);
-            color: white;
-            transition: background-color 0.3s;
-        }
-
-        .toggle-table-btn:hover {
-            background-color: #ccc;
-        }
-        .status-win {
-            color: green;
-            font-weight: bold;
-        }
-        .status-loss {
-            color: red;
-            font-weight: bold;
-        }
-        .status-tie {
-            color: gray;
-            font-weight: bold;
-        }
-
-
-        @media (max-width: 768px) {
-            h1 { font-size: 1.5em; }
-            .button-container { flex-direction: column; align-items: center; }
-            .button-container button { width: 80%; max-width: 300px; font-size: 14px; padding: 8px 15px; }
-            .center-count { font-size: 16px; }
-            .chart-container { height: 300px; }
-            .chartjs-tooltip { font-size: 12px; padding: 6px; }
-        }
-
-        @media (max-width: 480px) {
-            h1 { font-size: 1.2em; }
-            .button-container button { font-size: 12px; padding: 6px 10px; }
-            .center-count { font-size: 14px; }
-            .chart-container { height: 250px; }
-        }
-
-        @media (max-width: 1440px) {
-            .chart-wrapper, .table-wrapper { width: 90%; }
-            th, td { padding: 10px 12px; font-size: 14px; }
-        }
-
-        @media (max-width: 1366px) {
-            .chart-wrapper, .table-wrapper { width: 95%; }
-            th, td { padding: 8px 10px; font-size: 12px; }
-            .chart-container { height: 500px; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="button-container">
-        <button id="allBtn" onclick="showAllCenters()">All</button>
-        <button id="ourBtn" onclick="showOurCenters()">Our {{ category_name }}</button>
-        <button id="opponentBtn" onclick="showOpponentCenters()">Opponent {{ category_name }}</button>
-        <a href="{% url home_url %}">
-            <button>{{home_url_text}}</button>
-        </a>
+      <button id="allBtn" onclick="showAllCenters()">All</button>
+      <button id="ourBtn" onclick="showOurCenters()">
+        Our {{ category_name }}
+      </button>
+      <button id="opponentBtn" onclick="showOpponentCenters()">
+        Opponent {{ category_name }}
+      </button>
+      <a href="{% url home_url %}">
+        <button>{{home_url_text}}</button>
+      </a>
     </div>
 
     <h1 id="chartTitle">{{ title }}</h1>
-    
-    <div id="centerCount" class="center-count">Total Centers: {{ centers|length }}</div>
+
+    <div id="centerCount" class="center-count">
+      Total Centers: {{ centers|length }}
+    </div>
 
     <div class="chart-wrapper">
-        <div class="chart-container">
-            <canvas id="voteCountChart"></canvas>
-        </div>
+      <div class="chart-container">
+        <canvas id="voteCountChart"></canvas>
+      </div>
     </div>
 
     <button class="toggle-table-btn" onclick="toggleTable()">Show Table</button>
 
     <div class="table-wrapper" id="tableWrapper">
-        <table id="centersTable">
-            <thead>
-                <tr id="tableHeader">
-                    <th>Serial No.</th>
-                    <th>Center Name</th>
-                    <th onclick="sortTable('total_voter')">Total Voter<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
-                    <th onclick="sortTable('total_legal_vote')">Total Legal Vote<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
-                    <th onclick="sortTable('our_vote')">Our Vote<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
-                    <th onclick="sortTable('opponent_vote')">Opponent Vote<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
-                    <th onclick="sortTable('vote_difference')">Vote Difference<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
-                    <th onclick="sortTable('vote_difference_percentage')">Vote Difference (%)<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- Populated by JavaScript -->
-            </tbody>
-        </table>
+      <table id="centersTable">
+        <thead>
+          <tr id="tableHeader">
+            <th>Serial No.</th>
+            <th>Center Name</th>
+            <th onclick="sortTable('total_voter')">
+              Total Voter<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+            <th onclick="sortTable('total_legal_vote')">
+              Total Legal Vote<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+            <th onclick="sortTable('our_vote')">
+              Our Vote<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+            <th onclick="sortTable('our_vote_percentage')">
+              Our Vote in %<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+            <th onclick="sortTable('opponent_vote')">
+              Opponent Vote<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+            <th onclick="sortTable('vote_difference')">
+              Vote Difference<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+            <th onclick="sortTable('vote_difference_percentage')">
+              Vote Difference (%)<span class="sort-arrows"
+                ><span class="up">↑</span><span class="down">↓</span></span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Populated by JavaScript -->
+        </tbody>
+      </table>
     </div>
 
     <script>
-        const data = {
-            our_centers: {{ our_centers|safe }},
-            opponent_centers: {{ opponent_centers|safe }}
-        };
+      const data = {
+          our_centers: {{ our_centers|safe }},
+          opponent_centers: {{ opponent_centers|safe }}
+      };
 
-        let currentData = data.our_centers;
+      let currentData = data.our_centers;
 
-        // Sort state
-        let sortStates = {
-            total_voter: null, // null (unsorted), 'asc', 'desc'
-            total_legal_vote: null,
-            our_vote: null,
-            opponent_vote: null,
-            vote_difference: null,
-            vote_difference_percentage: null
-        };
+      // Sort state
+      let sortStates = {
+          total_voter: null, // null (unsorted), 'asc', 'desc'
+          total_legal_vote: null,
+          our_vote: null,
+          opponent_vote: null,
+          vote_difference: null,
+          vote_difference_percentage: null
+      };
 
-        const labels = currentData.map(center => center.center_name);
-        const ourVoteCounts = currentData.map(center => center['7']);
-        const opponentVoteCounts = currentData.map(center => center['2']);
+      const labels = currentData.map(center => center.center_name);
+      const ourVoteCounts = currentData.map(center => center['7']);
+      const opponentVoteCounts = currentData.map(center => center['2']);
 
-        function getFontSize() {
-            if (window.innerWidth < 480) return 8;
-            if (window.innerWidth < 768) return 10;
-            return 12;
-        }
+      function getFontSize() {
+          if (window.innerWidth < 480) return 8;
+          if (window.innerWidth < 768) return 10;
+          return 12;
+      }
 
-        const ctx = document.getElementById('voteCountChart').getContext('2d');
-        const voteCountChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Our Vote Count',
-                        data: ourVoteCounts,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        barPercentage: 0.8,
-                        categoryPercentage: 0.9
-                    },
-                    {
-                        label: 'Opponent Vote Count',
-                        data: opponentVoteCounts,
-                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1,
-                        barPercentage: 0.8,
-                        categoryPercentage: 0.9
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        ticks: {
-                            maxRotation: 90,
-                            minRotation: 45,
-                            font: { size: getFontSize() },
-                            autoSkip: false
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Vote Count',
-                            font: { size: getFontSize() + 2 }
-                        },
-                        ticks: { font: { size: getFontSize() } }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        enabled: false,
-                        external: function(context) {
-                            let tooltipEl = document.getElementById('chartjs-tooltip');
-                            if (!tooltipEl) {
-                                tooltipEl = document.createElement('div');
-                                tooltipEl.id = 'chartjs-tooltip';
-                                tooltipEl.className = 'chartjs-tooltip';
-                                document.body.appendChild(tooltipEl);
-                            }
+      const ctx = document.getElementById('voteCountChart').getContext('2d');
+      const voteCountChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+              labels: labels,
+              datasets: [
+                  {
+                      label: 'Our Vote Count',
+                      data: ourVoteCounts,
+                      backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                      borderColor: 'rgba(54, 162, 235, 1)',
+                      borderWidth: 1,
+                      barPercentage: 0.8,
+                      categoryPercentage: 0.9
+                  },
+                  {
+                      label: 'Opponent Vote Count',
+                      data: opponentVoteCounts,
+                      backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                      borderColor: 'rgba(255, 99, 132, 1)',
+                      borderWidth: 1,
+                      barPercentage: 0.8,
+                      categoryPercentage: 0.9
+                  }
+              ]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                  x: {
+                      ticks: {
+                          maxRotation: 90,
+                          minRotation: 45,
+                          font: { size: getFontSize() },
+                          autoSkip: false
+                      }
+                  },
+                  y: {
+                      beginAtZero: true,
+                      title: {
+                          display: true,
+                          text: 'Vote Count',
+                          font: { size: getFontSize() + 2 }
+                      },
+                      ticks: { font: { size: getFontSize() } }
+                  }
+              },
+              plugins: {
+                  tooltip: {
+                      enabled: false,
+                      external: function(context) {
+                          let tooltipEl = document.getElementById('chartjs-tooltip');
+                          if (!tooltipEl) {
+                              tooltipEl = document.createElement('div');
+                              tooltipEl.id = 'chartjs-tooltip';
+                              tooltipEl.className = 'chartjs-tooltip';
+                              document.body.appendChild(tooltipEl);
+                          }
 
-                            const tooltipModel = context.tooltip;
-                            if (tooltipModel.opacity === 0) {
-                                tooltipEl.style.opacity = 0;
-                                return;
-                            }
+                          const tooltipModel = context.tooltip;
+                          if (tooltipModel.opacity === 0) {
+                              tooltipEl.style.opacity = 0;
+                              return;
+                          }
 
-                            if (tooltipModel.body) {
-                                const index = tooltipModel.dataPoints[0].dataIndex;
-                                const ourCount = context.chart.data.datasets[0].data[index];
-                                const opponentCount = context.chart.data.datasets[1].data[index];
-                                const centerName = context.chart.data.labels[index];
+                          if (tooltipModel.body) {
+                              const index = tooltipModel.dataPoints[0].dataIndex;
+                              const ourCount = context.chart.data.datasets[0].data[index];
+                              const opponentCount = context.chart.data.datasets[1].data[index];
+                              const centerName = context.chart.data.labels[index];
 
-                                tooltipEl.innerHTML = `
-                                    <div>${centerName}</div>
-                                    <div>
-                                        <span class="chartjs-tooltip-key" style="background-color: rgba(54, 162, 235, 1);"></span>
-                                        Our Vote Count: ${ourCount}
-                                    </div>
-                                    <div>
-                                        <span class="chartjs-tooltip-key" style="background-color: rgba(255, 99, 132, 1);"></span>
-                                        Opponent Vote Count: ${opponentCount}
-                                    </div>
-                                `;
-                            }
+                              tooltipEl.innerHTML = `
+                                  <div>${centerName}</div>
+                                  <div>
+                                      <span class="chartjs-tooltip-key" style="background-color: rgba(54, 162, 235, 1);"></span>
+                                      Our Vote Count: ${ourCount}
+                                  </div>
+                                  <div>
+                                      <span class="chartjs-tooltip-key" style="background-color: rgba(255, 99, 132, 1);"></span>
+                                      Opponent Vote Count: ${opponentCount}
+                                  </div>
+                              `;
+                          }
 
-                            const position = context.chart.canvas.getBoundingClientRect();
-                            tooltipEl.style.opacity = 1;
-                            tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
-                            tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
-                        }
-                    }
-                }
-            }
-        });
+                          const position = context.chart.canvas.getBoundingClientRect();
+                          tooltipEl.style.opacity = 1;
+                          tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+                          tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
+                      }
+                  }
+              }
+          }
+      });
 
-        function showAllCenters() {
-            currentData = data.our_centers.concat(data.opponent_centers);
-            updateChartData(currentData);
-            updateTableData(currentData, all=1);
-            document.getElementById('chartTitle').textContent = "All Centers ({{ union_name }})";
-            document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
-            adjustChartWidth(currentData.length);
-            resetSortStates();
-            document.getElementById('tableHeader').appendChild(document.createElement('th')).textContent = "Status";
-        }
+      function showAllCenters() {
+          currentData = data.our_centers.concat(data.opponent_centers);
+          updateChartData(currentData);
+          updateTableData(currentData, all=1);
+          document.getElementById('chartTitle').textContent = "All Centers ({{ union_name }})";
+          document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+          adjustChartWidth(currentData.length);
+          resetSortStates();
+          document.getElementById('tableHeader').appendChild(document.createElement('th')).textContent = "Status";
+          document.getElementById("allBtn").classList.add('selected-button');
+      }
 
-        function showOurCenters() {
-            currentData = data.our_centers;
-            updateChartData(currentData);
-            updateTableData(currentData);
-            document.getElementById('chartTitle').textContent = "Our {{ title }}";
-            document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
-            adjustChartWidth(currentData.length);
-            resetSortStates();
-        }
+      function showOurCenters() {
+          currentData = data.our_centers;
+          updateChartData(currentData);
+          updateTableData(currentData);
+          document.getElementById('chartTitle').textContent = "Our {{ title }}";
+          document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+          adjustChartWidth(currentData.length);
+          resetSortStates();
+          document.getElementById("ourBtn").classList.add('selected-button');
+      }
 
-        function showOpponentCenters() {
-            currentData = data.opponent_centers;
-            updateChartData(currentData);
-            updateTableData(currentData);
-            document.getElementById('chartTitle').textContent = "Opponent {{ title }}";
-            document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
-            adjustChartWidth(currentData.length);
-            resetSortStates();
-        }
+      function showOpponentCenters() {
+          currentData = data.opponent_centers;
+          updateChartData(currentData);
+          updateTableData(currentData);
+          document.getElementById('chartTitle').textContent = "Opponent {{ title }}";
+          document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+          adjustChartWidth(currentData.length);
+          resetSortStates();
+          document.getElementById("opponentBtn").classList.add('selected-button');
+      }
 
-        function updateChartData(centerData) {
-            voteCountChart.data.labels = centerData.map(center => center.center_name);
-            voteCountChart.data.datasets[0].data = centerData.map(center => center['7']);
-            voteCountChart.data.datasets[1].data = centerData.map(center => center['2']);
-            voteCountChart.update();
-        }
+      function updateChartData(centerData) {
+          voteCountChart.data.labels = centerData.map(center => center.center_name);
+          voteCountChart.data.datasets[0].data = centerData.map(center => center['7']);
+          voteCountChart.data.datasets[1].data = centerData.map(center => center['2']);
+          voteCountChart.update();
+      }
 
-        // function adjustChartWidth(centerCount) {
-        //     const chartContainer = document.querySelector('.chart-container');
-        //     const newWidth = Math.max(1000, 50 * centerCount + 100);
-        //     chartContainer.style.width = `${newWidth}px`;
-        // }
-        function adjustChartWidth(centerCount) {
-            const chartContainer = document.querySelector('.chart-container');
-            const chartWrapper = document.querySelector('.chart-wrapper');
-            const newWidth = Math.max(1000, 50 * centerCount + 100); // 50px per bar + padding
-            chartContainer.style.width = `${newWidth}px`;
-            // Center the chart on load
-            const scrollWidth = chartContainer.scrollWidth - chartWrapper.clientWidth;
-            chartWrapper.scrollLeft = scrollWidth / 2;
-        }
+      // function adjustChartWidth(centerCount) {
+      //     const chartContainer = document.querySelector('.chart-container');
+      //     const newWidth = Math.max(1000, 50 * centerCount + 100);
+      //     chartContainer.style.width = `${newWidth}px`;
+      // }
+      function adjustChartWidth(centerCount) {
+          const chartContainer = document.querySelector('.chart-container');
+          const chartWrapper = document.querySelector('.chart-wrapper');
+          const newWidth = Math.max(1000, 50 * centerCount + 100); // 50px per bar + padding
+          chartContainer.style.width = `${newWidth}px`;
+          // Center the chart on load
+          const scrollWidth = chartContainer.scrollWidth - chartWrapper.clientWidth;
+          chartWrapper.scrollLeft = scrollWidth / 2;
+      }
 
-        function toggleTable() {
-            const tableWrapper = document.getElementById('tableWrapper');
-            const toggleBtn = document.querySelector('.toggle-table-btn');
-            if (tableWrapper.style.display === 'none' || tableWrapper.style.display === '') {
-                tableWrapper.style.display = 'block';
-                toggleBtn.textContent = 'Hide Table';
-            } else {
-                tableWrapper.style.display = 'none';
-                toggleBtn.textContent = 'Show Table';
-            }
-        }
+      function toggleTable() {
+          const tableWrapper = document.getElementById('tableWrapper');
+          const toggleBtn = document.querySelector('.toggle-table-btn');
+          if (tableWrapper.style.display === 'none' || tableWrapper.style.display === '') {
+              tableWrapper.style.display = 'block';
+              toggleBtn.textContent = 'Hide Table';
+          } else {
+              tableWrapper.style.display = 'none';
+              toggleBtn.textContent = 'Show Table';
+          }
+      }
 
-        function updateTableData(centerData, all=0) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-            
-            const totalCenter = centerData.length;
-            let totalVoters = 0;
-            let totalLegalVotes = 0;
-            let totalOurVotes = 0;
-            let totalOpponentVotes = 0;
-            let totalVoteDifference = 0;
-            let winCount = 0;
-            let lossCount = 0;
-            let tieCount = 0;
+      function updateTableData(centerData, all=0) {
+          const tableBody = document.getElementById('tableBody');
+          tableBody.innerHTML = '';
 
-            centerData.forEach((center, index) => {
-                const ourVote = center['7'] || 0;
-                const opponentVote = center['2'] || 0;
-                const totalVoter = center.total_voter || 0;
-                const totalLegalVote = center.total_legal_vote || 0;
-                const voteDifference = ourVote - opponentVote;
-                const voteDifferencePercentage = totalLegalVote > 0 ? ((voteDifference / totalLegalVote) * 100).toFixed(2) : 0;
-                let status="Win";
-                if(voteDifference<0){
-                    status="Loss";
-                    lossCount++;
-                }
-                else if(voteDifference==0){
-                    status="Tie";
-                    tieCount++;
-                }
-                else {
-                    status="Win";
-                    winCount++;
-                }
+          const totalCenter = centerData.length;
+          let totalVoters = 0;
+          let totalLegalVotes = 0;
+          let totalOurVotes = 0;
+          let totalOpponentVotes = 0;
+          let totalVoteDifference = 0;
+          let winCount = 0;
+          let lossCount = 0;
+          let tieCount = 0;
 
-                totalVoters += totalVoter;
-                totalLegalVotes += totalLegalVote;
-                totalOurVotes += ourVote;
-                totalOpponentVotes += opponentVote;
-                totalVoteDifference += voteDifference;
+          centerData.forEach((center, index) => {
+              const ourVote = center['7'] || 0;
+              const opponentVote = center['2'] || 0;
+              const totalVoter = center.total_voter || 0;
+              const totalLegalVote = center.total_legal_vote || 0;
+              const voteDifference = ourVote - opponentVote;
+              const voteDifferencePercentage = totalLegalVote > 0 ? ((voteDifference / totalLegalVote) * 100).toFixed(2) : 0;
+              const ourVotePercentage = totalLegalVote > 0 ? ((ourVote / totalLegalVote) * 100).toFixed(2) : 0;
+              let status="Win";
+              if(voteDifference<0){
+                  status="Loss";
+                  lossCount++;
+              }
+              else if(voteDifference==0){
+                  status="Tie";
+                  tieCount++;
+              }
+              else {
+                  status="Win";
+                  winCount++;
+              }
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${center.center_name || 'Unknown'}</td>
-                    <td>${totalVoter}</td>
-                    <td>${totalLegalVote}</td>
-                    <td>${ourVote}</td>
-                    <td>${opponentVote}</td>
-                    <td>${voteDifference}</td>
-                    <td>${voteDifferencePercentage}%</td>
-                `;
-                if (all) {
-                    let statusClass = status === "Win" ? "status-win" : (status === "Loss" ? "status-loss" : "status-tie");
-                    row.innerHTML += `<td class="${statusClass}">${status}</td>`;
-                }
+              totalVoters += totalVoter;
+              totalLegalVotes += totalLegalVote;
+              totalOurVotes += ourVote;
+              totalOpponentVotes += opponentVote;
+              totalVoteDifference += voteDifference;
 
-                tableBody.appendChild(row);
-            });
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                  <td>${index + 1}</td>
+                  <td>${center.center_name || 'Unknown'}</td>
+                  <td>${totalVoter}</td>
+                  <td>${totalLegalVote}</td>
+                  <td>${ourVote}</td>
+                  <td>${ourVotePercentage}%</td>
+                  <td>${opponentVote}</td>
+                  <td>${voteDifference}</td>
+                  <td>${voteDifferencePercentage}%</td>
+              `;
+              if (all) {
+                  let statusClass = status === "Win" ? "status-win" : (status === "Loss" ? "status-loss" : "status-tie");
+                  row.innerHTML += `<td class="${statusClass}">${status}</td>`;
+              }
 
-            const totalRow = document.createElement('tr');
-            totalRow.className = 'total-row';
-            const totalDifferencePercentage = totalLegalVotes > 0 ? ((totalVoteDifference / totalLegalVotes) * 100).toFixed(2) : 0;
-            totalRow.innerHTML = `
-                <td>Total</td>
-                <td>${totalCenter}</td>
-                <td>${totalVoters}</td>
-                <td>${totalLegalVotes}</td>
-                <td>${totalOurVotes}</td>
-                <td>${totalOpponentVotes}</td>
-                <td>${totalVoteDifference}</td>
-                <td>${totalDifferencePercentage}%</td>
-                <td>${winCount} Win, ${lossCount} Loss, ${tieCount} Tie</td>
-            `;
-            tableBody.appendChild(totalRow);
-        }
+              tableBody.appendChild(row);
+          });
 
-        function resetSortStates() {
-            for (let key in sortStates) {
-                sortStates[key] = null;
-            }
-            document.querySelectorAll('.sort-arrows span').forEach(arrow => {
-                arrow.classList.remove('active');
-            });
-        }
+          const totalRow = document.createElement('tr');
+          totalRow.className = 'total-row';
+          const totalDifferencePercentage = totalLegalVotes > 0 ? ((totalVoteDifference / totalLegalVotes) * 100).toFixed(2) : 0;
+          const totalOurVotePercentage = totalLegalVotes > 0 ? ((totalOurVotes / totalLegalVotes) * 100).toFixed(2) : 0;
+          totalRow.innerHTML = `
+              <td>Total</td>
+              <td>${totalCenter}</td>
+              <td>${totalVoters}</td>
+              <td>${totalLegalVotes}</td>
+              <td>${totalOurVotes}</td>
+              <td>${totalOurVotePercentage}%</td>
+              <td>${totalOpponentVotes}</td>
+              <td>${totalVoteDifference}</td>
+              <td>${totalDifferencePercentage}%</td>
+              <td>${winCount} Win, ${lossCount} Loss, ${tieCount} Tie</td>
+          `;
+          tableBody.appendChild(totalRow);
+      }
 
-        function sortTable(column) {
-            let direction = sortStates[column];
-            if (direction === null || direction === 'desc') {
-                direction = 'asc';
-            } else {
-                direction = 'desc';
-            }
+      function resetSortStates() {
+          for (let key in sortStates) {
+              sortStates[key] = null;
+          }
+          document.querySelectorAll('.sort-arrows span').forEach(arrow => {
+              arrow.classList.remove('active');
+          });
+      }
 
-            for (let key in sortStates) {
-                if (key !== column) sortStates[key] = null;
-            }
-            sortStates[column] = direction;
+      function sortTable(column) {
+          let direction = sortStates[column];
+          if (direction === null || direction === 'desc') {
+              direction = 'asc';
+          } else {
+              direction = 'desc';
+          }
 
-            let sortedData = [...currentData];
-            sortedData.sort((a, b) => {
-                let aValue, bValue;
-                switch (column) {
-                    case 'total_voter':
-                        aValue = a.total_voter || 0;
-                        bValue = b.total_voter || 0;
-                        break;
-                    case 'total_legal_vote':
-                        aValue = a.total_legal_vote || 0;
-                        bValue = b.total_legal_vote || 0;
-                        break;
-                    case 'our_vote':
-                        aValue = a['7'] || 0;
-                        bValue = b['7'] || 0;
-                        break;
-                    case 'opponent_vote':
-                        aValue = a['2'] || 0;
-                        bValue = b['2'] || 0;
-                        break;
-                    case 'vote_difference':
-                        aValue = (a['7'] || 0) - (a['2'] || 0);
-                        bValue = (b['7'] || 0) - (b['2'] || 0);
-                        break;
-                    case 'vote_difference_percentage':
-                        aValue = a.total_legal_vote > 0 ? (((a['7'] || 0) - (a['2'] || 0)) / a.total_legal_vote * 100) : 0;
-                        bValue = b.total_legal_vote > 0 ? (((b['7'] || 0) - (b['2'] || 0)) / b.total_legal_vote * 100) : 0;
-                        break;
-                }
-                return direction === 'asc' ? aValue - bValue : bValue - aValue;
-            });
+          for (let key in sortStates) {
+              if (key !== column) sortStates[key] = null;
+          }
+          sortStates[column] = direction;
 
-            updateTableData(sortedData);
+          let sortedData = [...currentData];
+          sortedData.sort((a, b) => {
+              let aValue, bValue;
+              switch (column) {
+                  case 'total_voter':
+                      aValue = a.total_voter || 0;
+                      bValue = b.total_voter || 0;
+                      break;
+                  case 'total_legal_vote':
+                      aValue = a.total_legal_vote || 0;
+                      bValue = b.total_legal_vote || 0;
+                      break;
+                  case 'our_vote':
+                      aValue = a['7'] || 0;
+                      bValue = b['7'] || 0;
+                      break;
+                  case 'opponent_vote':
+                      aValue = a['2'] || 0;
+                      bValue = b['2'] || 0;
+                      break;
+                  case 'vote_difference':
+                      aValue = (a['7'] || 0) - (a['2'] || 0);
+                      bValue = (b['7'] || 0) - (b['2'] || 0);
+                      break;
+                  case 'vote_difference_percentage':
+                      aValue = a.total_legal_vote > 0 ? (((a['7'] || 0) - (a['2'] || 0)) / a.total_legal_vote * 100) : 0;
+                      bValue = b.total_legal_vote > 0 ? (((b['7'] || 0) - (b['2'] || 0)) / b.total_legal_vote * 100) : 0;
+                      break;
+                    case 'ourh_vote_percentage':
+                        aValue = a.total_legal_vote > 0 ? ((a['7'] || 0) / a.total_legal_vote * 100) : 0;
+                        bValue = b.total_legal_vote > 0 ? ((b['7'] || 0) / b.total_legal_vote * 100) : 0;
+              }
+              return direction === 'asc' ? aValue - bValue : bValue - aValue;
+          });
 
-            document.querySelectorAll('.sort-arrows span').forEach(arrow => {
-                arrow.classList.remove('active');
-            });
-            const activeArrow = document.querySelector(`th[onclick="sortTable('${column}')"] .sort-arrows .${direction === 'asc' ? 'up' : 'down'}`);
-            if (activeArrow) activeArrow.classList.add('active');
-        }
+          updateTableData(sortedData);
 
-        showOurCenters();
+          document.querySelectorAll('.sort-arrows span').forEach(arrow => {
+              arrow.classList.remove('active');
+          });
+          const activeArrow = document.querySelector(`th[onclick="sortTable('${column}')"] .sort-arrows .${direction === 'asc' ? 'up' : 'down'}`);
+          if (activeArrow) activeArrow.classList.add('active');
+      }
 
-        window.addEventListener('resize', () => {
-            const fontSize = getFontSize();
-            voteCountChart.options.scales.x.ticks.font.size = fontSize;
-            voteCountChart.options.scales.y.ticks.font.size = fontSize;
-            voteCountChart.options.scales.y.title.font.size = fontSize + 2;
-            voteCountChart.update();
-        });
+      showAllCenters();
+
+      function resetBtn() {
+          document.getElementById("allBtn").classList.remove('selected-button');
+          document.getElementById("ourBtn").classList.remove('selected-button');
+          document.getElementById("opponentBtn").classList.remove('selected-button');
+      }
+
+      window.addEventListener('resize', () => {
+          const fontSize = getFontSize();
+          voteCountChart.options.scales.x.ticks.font.size = fontSize;
+          voteCountChart.options.scales.y.ticks.font.size = fontSize;
+          voteCountChart.options.scales.y.title.font.size = fontSize + 2;
+          voteCountChart.update();
+      });
     </script>
-</body>
+  </body>
 </html>
