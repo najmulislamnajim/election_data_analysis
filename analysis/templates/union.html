@@ -407,7 +407,7 @@
 
             const votesCtx = document.getElementById(`votesChart-${upazilaKey}-${unionKey}`).getContext('2d');
             const not_casted = union.total_voters - union.total_votes;
-            const other_votes = union.total_votes - (union.our_casted_votes + union.opponent_casted_votes + union.total_cancelled_votes);
+            const other_votes = union.total_votes - (union.our_casted_votes + union.opponent_casted_votes);
             new Chart(votesCtx, {
                 type: 'pie',
                 data: {
