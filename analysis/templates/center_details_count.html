@@ -173,6 +173,19 @@
         .toggle-table-btn:hover {
             background-color: #ccc;
         }
+        .status-win {
+            color: green;
+            font-weight: bold;
+        }
+        .status-loss {
+            color: red;
+            font-weight: bold;
+        }
+        .status-tie {
+            color: gray;
+            font-weight: bold;
+        }
+
 
         @media (max-width: 768px) {
             h1 { font-size: 1.5em; }
@@ -204,6 +217,7 @@
 </head>
 <body>
     <div class="button-container">
+        <button id="allBtn" onclick="showAllCenters()">All</button>
         <button id="ourBtn" onclick="showOurCenters()">Our {{ category_name }}</button>
         <button id="opponentBtn" onclick="showOpponentCenters()">Opponent {{ category_name }}</button>
         <a href="{% url home_url %}">
@@ -226,7 +240,7 @@
     <div class="table-wrapper" id="tableWrapper">
         <table id="centersTable">
             <thead>
-                <tr>
+                <tr id="tableHeader">
                     <th>Serial No.</th>
                     <th>Center Name</th>
                     <th onclick="sortTable('total_voter')">Total Voter<span class="sort-arrows"><span class="up">↑</span><span class="down">↓</span></span></th>
@@ -366,6 +380,17 @@
             }
         });
 
+        function showAllCenters() {
+            currentData = data.our_centers.concat(data.opponent_centers);
+            updateChartData(currentData);
+            updateTableData(currentData, all=1);
+            document.getElementById('chartTitle').textContent = "All Centers ({{ union_name }})";
+            document.getElementById('centerCount').textContent = "Total Centers: " + currentData.length;
+            adjustChartWidth(currentData.length);
+            resetSortStates();
+            document.getElementById('tableHeader').appendChild(document.createElement('th')).textContent = "Status";
+        }
+
         function showOurCenters() {
             currentData = data.our_centers;
             updateChartData(currentData);
@@ -420,7 +445,7 @@
             }
         }
 
-        function updateTableData(centerData) {
+        function updateTableData(centerData, all=0) {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
             
@@ -430,6 +455,9 @@
             let totalOurVotes = 0;
             let totalOpponentVotes = 0;
             let totalVoteDifference = 0;
+            let winCount = 0;
+            let lossCount = 0;
+            let tieCount = 0;
 
             centerData.forEach((center, index) => {
                 const ourVote = center['7'] || 0;
@@ -438,6 +466,19 @@
                 const totalLegalVote = center.total_legal_vote || 0;
                 const voteDifference = ourVote - opponentVote;
                 const voteDifferencePercentage = totalLegalVote > 0 ? ((voteDifference / totalLegalVote) * 100).toFixed(2) : 0;
+                let status="Win";
+                if(voteDifference<0){
+                    status="Loss";
+                    lossCount++;
+                }
+                else if(voteDifference==0){
+                    status="Tie";
+                    tieCount++;
+                }
+                else {
+                    status="Win";
+                    winCount++;
+                }
 
                 totalVoters += totalVoter;
                 totalLegalVotes += totalLegalVote;
@@ -456,6 +497,11 @@
                     <td>${voteDifference}</td>
                     <td>${voteDifferencePercentage}%</td>
                 `;
+                if (all) {
+                    let statusClass = status === "Win" ? "status-win" : (status === "Loss" ? "status-loss" : "status-tie");
+                    row.innerHTML += `<td class="${statusClass}">${status}</td>`;
+                }
+
                 tableBody.appendChild(row);
             });
 
@@ -471,6 +517,7 @@
                 <td>${totalOpponentVotes}</td>
                 <td>${totalVoteDifference}</td>
                 <td>${totalDifferencePercentage}%</td>
+                <td>${winCount} Win, ${lossCount} Loss, ${tieCount} Tie</td>
             `;
             tableBody.appendChild(totalRow);
         }
