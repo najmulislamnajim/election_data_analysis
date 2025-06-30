@@ -32,4 +32,7 @@ urlpatterns = [
     path('un-losing/<str:union_name>/', views.union_losing_details_rate, name='union_losing_details_rate'),
     path('un-winning-count/<str:union_name>/', views.union_winning_details_count, name='union_winning_details_count'),
     path('un-losing-count/<str:union_name>/', views.union_losing_details_count, name='union_losing_details_count'),
+    
+    path('upazila_wise_union/', views.upazila_wise_union_view, name='upazila_wise_union'),
+    path('union_list', views.summary_report, name='union_list'),
 ]

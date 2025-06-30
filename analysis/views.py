@@ -1,14 +1,12 @@
 from django.shortcuts import render
 from django.utils.text import slugify
-from .utils import analyze_election_data, upazila_analysis, union_analysis, union_analysis_2
+from .utils import analyze_election_data, upazila_analysis, union_analysis, union_analysis_2, upazila_wise_union, get_upazila_union_summary
 import json
 
 def plot_vote_rates(request):
     data = analyze_election_data()
     # Pass the data to the template
     return render(request, 'test.html', {'data':data})
-
-
 
 def home(request):
     data = analyze_election_data()
@@ -184,30 +182,6 @@ def upazila_losing_details_count(request, upazila_name=None):
     }
     return render(request, 'center_details_count.html', context)
 
-
-# def union_analysis_view(request):
-#     data = union_analysis()
-#     union_data = list(data.values())
-#     for u in union_data:
-#         u['total_center_count'] = int(u['total_center_count'])
-#         u['winning_center_count'] = int(u['winning_center_count'])
-#         u['losing_center_count'] = int(u['losing_center_count'])
-#         u['winning_percentage'] = float(u['winning_percentage'])
-#         u['losing_percentage'] = float(u['losing_percentage'])
-#         u['total_voters'] = int(u['total_voters'])
-#         u['total_votes'] = int(u['total_votes'])
-#         u['our_casted_votes'] = int(u['our_casted_votes'])
-#         u['opponent_casted_votes'] = int(u['opponent_casted_votes'])
-#         u['total_cancelled_votes'] = int(u['total_cancelled_votes'])
-    
-#     final_data = union_data
-
-#     context = {
-#         'upazilas': final_data,
-#         'upazilas_json': json.dumps(final_data)
-#     }
-#     return render(request, 'union_test.html', context)
-
 def union_analysis_view(request):
     data = union_analysis_2()
     upazila_data = list(data.values())
@@ -287,3 +261,17 @@ def union_losing_details_count(request, union_name=None):
         'home_url_text': 'Back to Union Analysis'
     }
     return render(request, 'center_details_count.html', context)
+
+def upazila_wise_union_view(request):
+    context = {
+        'data': upazila_wise_union()
+    }
+    return render(request, 'upazila_wise_union.html', context)
+
+def summary_report(request):
+    context = {
+        'data': get_upazila_union_summary()
+    }
+    return render(request, 'summary_report.html', context)
+
+

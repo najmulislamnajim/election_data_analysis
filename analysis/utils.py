@@ -258,3 +258,68 @@ def union_analysis_2():
         }
     
     return upazila_data
+
+
+def upazila_wise_union():
+    election_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/election_data.csv'))
+    center_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/center_details.csv'))
+    df = election_data.merge(center_data, on='id')
+
+    # Calculate vote percentages
+    df['our_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['7'] / df['total_legal_vote']) * 100, 0).round(2)
+    df['opponent_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['2'] / df['total_legal_vote']) * 100, 0).round(2)
+
+    # Build nested dict: {upazila -> {union -> [center rows as dict]}}
+    nested_data = {}
+    for _, row in df.iterrows():
+        upazila = row['upazila']
+        union = row['union']
+        center_info = {
+            'center_name': row['center_name'],
+            'total_voter': row['total_voter'],
+            'total_legal_vote': row['total_legal_vote'],
+            'our_vote': row['7'],
+            'opponent_vote': row['2'],
+            'our_vote_rate': row['our_vote_rate'],
+            'opponent_vote_rate': row['opponent_vote_rate'],
+            'status': 'win' if row['our_vote_rate'] > row['opponent_vote_rate'] else 'lose'
+        }
+
+        nested_data.setdefault(upazila, {}).setdefault(union, []).append(center_info)
+
+    return nested_data
+
+def get_upazila_union_summary():
+    election_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/election_data.csv'))
+    center_data = pd.read_csv(os.path.join(os.path.dirname(__file__), './data/center_details.csv'))
+    df = election_data.merge(center_data, on='id')
+
+    df['our_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['7'] / df['total_legal_vote']) * 100, 0).round(2)
+    df['opponent_vote_rate'] = np.where(df['total_legal_vote'] > 0, (df['2'] / df['total_legal_vote']) * 100, 0).round(2)
+
+    summary = {}
+
+    grouped = df.groupby(['upazila', 'union'])
+    for (upazila, union), group in grouped:
+        total_voter = group['total_voter'].sum()
+        total_legal_vote = group['total_legal_vote'].sum()
+        our_vote = group['7'].sum()
+        opponent_vote = group['2'].sum()
+
+        our_vote_rate = round((our_vote / total_legal_vote) * 100, 2) if total_legal_vote > 0 else 0
+        opponent_vote_rate = round((opponent_vote / total_legal_vote) * 100, 2) if total_legal_vote > 0 else 0
+        status = 'win' if our_vote_rate > opponent_vote_rate else 'lose'
+
+        union_data = {
+            'total_voter': total_voter,
+            'total_legal_vote': total_legal_vote,
+            'our_vote': our_vote,
+            'opponent_vote': opponent_vote,
+            'our_vote_rate': our_vote_rate,
+            'opponent_vote_rate': opponent_vote_rate,
+            'status': status
+        }
+
+        summary.setdefault(upazila, {})[union] = union_data
+
+    return summary

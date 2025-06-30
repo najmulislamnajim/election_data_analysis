@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Election Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function toggleVisibility(id) {
+      const section = document.getElementById(id);
+      section.classList.toggle('hidden');
+    }
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-6">
+
+  <h1 class="text-3xl font-bold mb-6 text-center text-blue-700">Election Report</h1>
+
+  {% for upazila, unions in data.items %}
+    <div class="mb-10">
+      <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-1 border-blue-300">{{ upazila }}</h2>
+
+      {% for union, centers in unions.items %}
+        <div class="mb-4 bg-white rounded-lg shadow">
+          <button 
+            class="w-full text-left px-4 py-3 font-medium text-lg bg-blue-50 hover:bg-blue-100 rounded-t-lg"
+            onclick="toggleVisibility('union-{{ upazila|slugify }}-{{ union|slugify }}')">
+            🔽 {{ union }}
+          </button>
+          <div id="union-{{ upazila|slugify }}-{{ union|slugify }}" class="hidden overflow-x-auto p-4">
+            <table class="min-w-full text-sm text-left border rounded-lg">
+              <thead class="bg-blue-200 text-gray-700">
+                <tr>
+                  <th class="px-4 py-2">Center Name</th>
+                  <th class="px-4 py-2">Total Voter</th>
+                  <th class="px-4 py-2">Legal Vote</th>
+                  <th class="px-4 py-2">Our Vote</th>
+                  <th class="px-4 py-2">Opponent Vote</th>
+                  <th class="px-4 py-2">Our Vote %</th>
+                  <th class="px-4 py-2">Opponent Vote %</th>
+                  <th class="px-4 py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                {% for center in centers %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-2 font-medium">{{ center.center_name }}</td>
+                  <td class="px-4 py-2">{{ center.total_voter }}</td>
+                  <td class="px-4 py-2">{{ center.total_legal_vote }}</td>
+                  <td class="px-4 py-2">{{ center.our_vote }}</td>
+                  <td class="px-4 py-2">{{ center.opponent_vote }}</td>
+                  <td class="px-4 py-2">
+                    <span class="px-2 py-1 rounded-full text-white text-xs font-semibold {% if center.our_vote_rate > 50 %}bg-green-500{% else %}bg-yellow-500{% endif %}">
+                      {{ center.our_vote_rate }}%
+                    </span>
+                  </td>
+                  <td class="px-4 py-2">
+                    <span class="px-2 py-1 rounded-full text-white text-xs font-semibold {% if center.opponent_vote_rate > 50 %}bg-red-500{% else %}bg-yellow-500{% endif %}">
+                      {{ center.opponent_vote_rate }}%
+                    </span>
+                  </td>
+                  <td class="px-4 py-2">
+                    <span class="px-2 py-1 rounded-full text-white text-xs font-semibold
+                      {% if center.status == 'win' %}bg-green-600
+                      {% else %}bg-red-600{% endif %}">
+                      {{ center.status|title }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+</body>
+</html>
